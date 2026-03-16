@@ -396,7 +396,7 @@ export default function BridgingDesignDev() {
             designers dynamically design real graphs, instantly see results, and
             refine accordingly.
           </p>
-          <p className="col-span-12 mt-6 text-xl text-stone-600 lg:col-span-6">
+          {/* <p className="col-span-12 mt-6 text-xl text-stone-600 lg:col-span-6">
             Design crits that used to span multiple sessions over days started
             happening live — someone would suggest a change, the designer would
             make it on the spot, and we'd evaluate it together in real time.
@@ -405,7 +405,7 @@ export default function BridgingDesignDev() {
             like engineers being unsure about the state of a unit. And the users
             themselves were able to see much more realistic data, which
             fundamentally changed the quality of the feedback we got.
-          </p>
+          </p> */}
         </div>
       </Container>
       <Container className="mt-12">
@@ -436,36 +436,31 @@ export default function BridgingDesignDev() {
           </h2>
           <p className="col-span-12 mt-4 text-xl text-stone-600 lg:col-span-6">
             In addition to my design system work, I owned the end-to-end design
-            of many mission critical tools, such as complex energy and unit
-            monitoring tools, compact and ever-present quick schedulers, and
-            investigation tools that help diagnose and address issues.
-          </p>
-          <p className="col-span-12 mt-6 text-xl text-stone-600 lg:col-span-6">
-            These tools were fundamental to current and future workflows,
-            enabling easy and informed bulk actions rather than individual
-            controls, massively reducing dispatch effort.
+            of many mission critical tools that were fundamental to current and
+            future workflows, enabling easy and informed bulk actions rather
+            than individual controls, massively reducing dispatch effort.
           </p>
         </div>
       </Container>
       <Container className="mt-12">
         <div className="grid grid-cols-12 gap-4 items-start">
-          <img
-            src={`${IMG}/mission-3.png`}
-            alt="Energy monitoring tool interface"
-            className="col-span-12 mt-0 w-full lg:col-span-6 lg:mt-40"
-          />
           <div className="col-span-12 flex flex-col gap-4 lg:col-span-6">
             <img
-              src={`${IMG}/mission-2.png`}
-              alt="Unit monitoring dashboard"
-              className="w-full"
+              src={`${IMG}/mission-3.png`}
+              alt="Energy monitoring tool interface"
+              className="col-span-12 mt-0 w-full lg:col-span-6"
             />
             <img
               src={`${IMG}/mission-4.png`}
               alt="Quick scheduler tool"
-              className="w-full"
+              className="col-span-12 mt-0 w-full lg:col-span-6"
             />
           </div>
+          <img
+            src={`${IMG}/mission-2.png`}
+            alt="Unit monitoring dashboard"
+            className="col-span-12 mt-0 w-full lg:col-span-6"
+          />
         </div>
       </Container>
 

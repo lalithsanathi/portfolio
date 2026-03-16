@@ -104,7 +104,7 @@ export default function Home() {
               size="tall"
             />
           }
-        />*/}
+        /> */}
       </div>
 
       {/* Bottom fade */}
