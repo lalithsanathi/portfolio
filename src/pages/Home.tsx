@@ -79,24 +79,24 @@ export default function Home() {
         />
 
         {/* Side Projects */}
-        {/* <ProjectSection
+        <ProjectSection
           heading="Side projects"
           description="I like to create playful tools and useful toys. The following are a few of my experiments, explorations, and endeavors."
-          leftColumn={
-            <>
-              <ProjectCard
-                title="Embedding models for user research"
-                href="/projects/embedding-models"
-                size="short"
-                imageSrc="/images/projects/side-embedding-models.png"
-                variant="dark"
-              />
-              <ProjectCard
-                title="A visual, Spatial Search for Typefaces"
-                size="short"
-              />
-            </>
-          }
+          // leftColumn={
+          //   <>
+          //     <ProjectCard
+          //       title="Embedding models for user research"
+          //       href="/projects/embedding-models"
+          //       size="short"
+          //       imageSrc="/images/projects/side-embedding-models.png"
+          //       variant="dark"
+          //     />
+          //     <ProjectCard
+          //       title="A visual, Spatial Search for Typefaces"
+          //       size="short"
+          //     />
+          //   </>
+          // }
           rightColumn={
             <ProjectCard
               title="A community platform for times of crisis"
@@ -104,7 +104,7 @@ export default function Home() {
               size="tall"
             />
           }
-        /> */}
+        />
       </div>
 
       {/* Bottom fade */}
