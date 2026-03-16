@@ -1,0 +1,35 @@
+<svg width="1053" height="1080" viewBox="0 0 1053 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_5738_11444)">
+<line opacity="0.3" x1="516.019" y1="540.276" x2="453.019" y2="88.2761" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="516.728" y1="538.457" x2="784.728" y2="317.457" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="519.741" y1="540.985" x2="390.741" y2="768.985" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="516.72" y1="541.537" x2="265.72" y2="332.537" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="516.355" y1="538.863" x2="816.355" y2="104.863" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="518.3" y1="538.023" x2="953.3" y2="604.023" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="519.374" y1="538.547" x2="778.374" y2="783.547" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="519.535" y1="541.282" x2="190.535" y2="935.282" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="518.622" y1="541.901" x2="188.622" y2="649.901" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="519.888" y1="539.339" x2="677.888" y2="990.339" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="516.315" y1="541.078" x2="253.315" y2="130.078" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<line opacity="0.3" x1="516.165" y1="539.205" x2="626.165" y2="285.205" stroke="black" stroke-width="4" stroke-dasharray="8 8"/>
+<circle cx="516" cy="540" r="64" fill="#9DE8FF"/>
+<path d="M537.333 564C537.333 560.278 537.333 558.418 536.873 556.904C535.839 553.495 533.171 550.827 529.762 549.793C528.248 549.333 526.388 549.333 522.666 549.333H509.333C505.611 549.333 503.75 549.333 502.236 549.793C498.827 550.827 496.159 553.495 495.125 556.904C494.666 558.418 494.666 560.278 494.666 564M527.999 528C527.999 534.627 522.627 540 515.999 540C509.372 540 503.999 534.627 503.999 528C503.999 521.373 509.372 516 515.999 516C522.627 516 527.999 521.373 527.999 528Z" stroke="black" stroke-width="5.33333" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="627.5" cy="285.5" r="13.5" fill="black"/>
+<circle cx="786.5" cy="316.5" r="13.5" fill="black"/>
+<circle cx="779.5" cy="784.5" r="13.5" fill="black"/>
+<circle cx="681.5" cy="1001.5" r="13.5" fill="black"/>
+<circle cx="389.5" cy="771.5" r="13.5" fill="black"/>
+<circle cx="188.5" cy="937.5" r="13.5" fill="black"/>
+<circle cx="250.5" cy="126.5" r="13.5" fill="black"/>
+<circle cx="953.5" cy="603.5" r="13.5" fill="black"/>
+<circle cx="175.5" cy="653.5" r="13.5" fill="black"/>
+<circle cx="263.5" cy="330.5" r="13.5" fill="black"/>
+<circle cx="451.5" cy="85.5" r="13.5" fill="black"/>
+<circle cx="820.5" cy="99.5" r="13.5" fill="black"/>
+</g>
+<defs>
+<clipPath id="clip0_5738_11444">
+<rect width="1053" height="1080" fill="white"/>
+</clipPath>
+</defs>
+</svg>

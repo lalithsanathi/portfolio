@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Adamina", ui-serif, Georgia, serif;
+
+  --color-gray-warm-50: #fafaf8;
+  --color-gray-warm-100: #f5f4f2;
+  --color-gray-warm-200: #F0EDED;
+  --color-gray-warm-300: #dfddd9;
+  --color-gray-warm-400: #b0ada8;
+  --color-gray-warm-500: #807d78;
+  --color-gray-warm-600: #5e5b57;
+  --color-gray-warm-700: #464440;
+  --color-gray-warm-800: #2d2b29;
+  --color-gray-warm-900: #1d1c1a;
+  --color-gray-warm-950: #0e0d0c;
+
+  --text-xl--line-height: 2rem;    /* 32px (default: 28px) */
+
+  --text-3xl: 2rem;              /* 32px (default: 30px) */
+  --text-3xl--line-height: 2.5rem;    /* 40px (default: 36px) */
+
+  --text-4xl: 2.5rem;            /* 40px (default: 36px) */
+  --text-4xl--line-height: 3.5rem;    /* 56px (default: 40px) */
+
+  --text-5xl--line-height: 4rem;    /* 64px (default: 48px) */
+
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-black);
+    background-color: var(--color-gray-warm-200);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+}
