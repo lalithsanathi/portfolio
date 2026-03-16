@@ -20,6 +20,7 @@ const sizeClasses: Record<CardSize, string> = {
 const sharedClasses = [
   'group relative block w-full overflow-hidden rounded-2xl p-6 text-left',
   'transition-transform duration-200 active:scale-[0.95]',
+  'border border-stone-300',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700',
 ];
 

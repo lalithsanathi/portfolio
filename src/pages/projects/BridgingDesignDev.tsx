@@ -183,8 +183,8 @@ export default function BridgingDesignDev() {
                 asked of them.
               </li>
               <li className="my-2">
-                This made it hard to ask the right questions and build
-                shared understanding, so decisions were short-sighted.
+                This made it hard to ask the right questions and build shared
+                understanding, so decisions were short-sighted.
               </li>
             </ul>
           </div>
@@ -548,21 +548,21 @@ export default function BridgingDesignDev() {
           </p>
         </div>
       </Container>
-      <Container className="mt-12">
-        <div className="grid grid-cols-2 gap-x-12 gap-y-8 lg:grid-cols-4">
-          <div className="flex flex-col gap-2">
+      <Container className="mt-12 grid grid-cols-12 gap-x-8">
+        <div className="grid grid-cols-12 col-span-12 lg:grid-cols-8 lg:col-span-8 gap-x-12 gap-y-8">
+          <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">75% fewer</p>
             <p className="text-xl">design-match defects</p>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">2x</p>
             <p className="text-xl">design-to-output speed</p>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">Highest NPS</p>
             <p className="text-xl">for a project across IBM UK&I</p>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">30% fewer</p>
             <p className="text-xl">edge case defects</p>
           </div>
@@ -585,35 +585,35 @@ export default function BridgingDesignDev() {
         </div>
       </Container>
 
-      <Container className="mt-12">
-        <p className="max-w-[563px] text-2xl opacity-80">
+      <Container className="mt-12 grid grid-cols-12 gap-x-8">
+        <p className="col-span-12 text-2xl opacity-80 lg:col-span-6">
           Before, a single balancing action took a control room engineer 30
           minutes and 610 clicks. After — 3 minutes and 10 clicks. A 90%
           reduction in user input.
         </p>
       </Container>
 
-      <Container className="mt-16">
-        <p className="max-w-[555px] text-xl text-stone-600">
+      <Container className="mt-16 grid grid-cols-12 gap-x-8">
+        <p className="col-span-12 text-xl text-stone-600 lg:col-span-6">
           A year after launching, we saw the wider impact on the grid and the UK
           at large.
         </p>
       </Container>
-      <Container className="mt-8">
-        <div className="grid grid-cols-2 gap-x-12 gap-y-8 lg:grid-cols-4">
-          <div className="flex flex-col gap-2">
+      <Container className="mt-8 grid grid-cols-12 gap-x-8">
+        <div className="grid grid-cols-12 col-span-12 lg:grid-cols-8 lg:col-span-8 gap-x-12 gap-y-8">
+          <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">+283%</p>
             <p className="text-xl">jump in daily battery dispatch volume</p>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">217 → 1,867</p>
             <p className="text-xl">Change in daily instructions</p>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">£15 million/year</p>
             <p className="text-xl">projected consumer savings</p>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">37,400 tons</p>
             <p className="text-xl">
               of CO<sub className="text-xs">2</sub> avoided since launch
@@ -629,7 +629,7 @@ export default function BridgingDesignDev() {
       <Container className="mt-12">
         <div className="flex flex-col gap-16">
           <div>
-            <p className="max-w-[800px] text-xl">
+            <p className="text-xl">
               "Lalith you are a superstar, and I hope you know that. I am really
               glad that we got you to join the team, and I am excited about the
               work that we will do together over the coming months. You are
@@ -652,7 +652,7 @@ export default function BridgingDesignDev() {
           </div>
 
           <div>
-            <p className="max-w-[800px] text-xl">
+            <p className="text-xl">
               "I really appreciated how you walked me through the whole design
               system process, starting with observing the current structure and
               outlining a vision for how the new change would be structured, to
