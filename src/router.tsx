@@ -11,9 +11,14 @@ import MaltedSRM from './pages/projects/MaltedSRM';
 import BridgingDesignDev from './pages/projects/BridgingDesignDev';
 import EmbeddingModels from './pages/projects/EmbeddingModels';
 import CommunityCrisis from './pages/projects/CommunityCrisis';
+import LightboxProvider from './components/Lightbox';
 
 const rootRoute = createRootRoute({
-  component: () => <Outlet />,
+  component: () => (
+    <LightboxProvider>
+      <Outlet />
+    </LightboxProvider>
+  ),
 });
 
 const indexRoute = createRoute({

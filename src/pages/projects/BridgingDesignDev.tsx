@@ -5,7 +5,7 @@ const IMG = "/images/projects/national-grid";
 
 export default function BridgingDesignDev() {
   return (
-    <main className="pb-40">
+    <main className="pb-40" data-lightbox>
       <CaseStudyHeader
         title="Bringing balance at National Grid"
         meta={[
@@ -602,7 +602,7 @@ export default function BridgingDesignDev() {
           </div>
           <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">217 → 1,867</p>
-            <p className="text-xl">Change in daily instructions</p>
+            <p className="text-xl">Increase in daily instructions</p>
           </div>
           <div className="col-span-6 lg:col-span-4 flex flex-col gap-2">
             <p className="text-3xl opacity-80">£15 million/year</p>
@@ -636,6 +636,7 @@ export default function BridgingDesignDev() {
                 src={`${IMG}/avatar-mark.png`}
                 alt=""
                 className="size-16 rounded-full object-cover"
+                data-no-lightbox
               />
               <div>
                 <p className="text-xl font-medium">Mark Williams</p>
@@ -661,6 +662,7 @@ export default function BridgingDesignDev() {
                 src={`${IMG}/avatar-ellie.png`}
                 alt=""
                 className="size-16 rounded-full object-cover"
+                data-no-lightbox
               />
               <div>
                 <p className="text-xl font-medium">Ellie Ritchie</p>

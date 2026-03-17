@@ -24,7 +24,7 @@ export default function Home() {
         {/* Malted AI */}
         <ProjectSection
           heading="Malted AI"
-          description="Helping financial organisations use language models to better understand their customer data."
+          description="Helping financial organisations use small language models to better understand their customer data."
           leftColumn={
             <ProjectCard
               title="Malted Pulse"

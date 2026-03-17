@@ -3,7 +3,7 @@ import CaseStudyHeader from "../../components/CaseStudyHeader";
 
 export default function MaltedSRM() {
   return (
-    <main className="pb-40">
+    <main className="pb-40" data-lightbox>
       <CaseStudyHeader
         title="Accelerating due diligence at Malted"
         meta={[

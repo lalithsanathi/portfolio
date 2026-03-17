@@ -5,7 +5,7 @@ const IMG = "/images/projects/community-crisis";
 
 export default function CommunityCrisis() {
   return (
-    <main className="pb-40">
+    <main className="pb-40" data-lightbox>
       <CaseStudyHeader
         title="A community platform for times of crisis"
         meta={[
@@ -31,17 +31,14 @@ export default function CommunityCrisis() {
       <Container className="mt-20 lg:mt-56">
         <div className="grid grid-cols-12 gap-x-8">
           <p className="col-span-12 text-3xl lg:col-span-6">
-            In a crisis, people instinctively find whatever ways they can to help each other—using any means or resources available to support those in need.
+            In a crisis, people instinctively want to support those in need.
           </p>
-          {/* <p className="col-span-12 mt-6 text-xl text-stone-600 lg:col-span-6 lg:col-start-7 lg:mt-0">
-            People don't know what's happening, what to do, or who can help.
-            Existing infrastructure breaks down, and the period when self-help
-            is most crucial — the golden moment — is lost to panic and
-            disorganisation.
-          </p> */}
+          <p className="col-span-12 mt-6 text-xl text-stone-600 lg:col-span-6 lg:col-start-1">
+            But people who need help often don't know what's available, and people that can support often don't know how to reach those in need.
+          </p>
         </div>
       </Container>
-      <Container className="mt-12">
+      {/* <Container className="mt-12">
         <div className="grid grid-cols-12 gap-4">
           <img
             src={`${IMG}/context.png`}
@@ -49,7 +46,7 @@ export default function CommunityCrisis() {
             className="col-span-12 w-full rounded-2xl"
           />
         </div>
-      </Container>
+      </Container> */}
 
       {/* ── Goal ── */}
       <Container className="mt-20 lg:mt-56">
@@ -81,6 +78,7 @@ export default function CommunityCrisis() {
               src={`${IMG}/golden_moment_citcle.png`}
               alt="The Golden Moment icon"
               className="mb-6 size-20 object-contain"
+              data-no-lightbox
             />
             <h3 className="text-2xl font-medium">The Golden Moment</h3>
             <p className="mt-2 text-lg text-stone-500">
@@ -101,6 +99,7 @@ export default function CommunityCrisis() {
               src={`${IMG}/Sending_Flare_Circle.png`}
               alt="Sending a Flare icon"
               className="mb-6 size-20 object-contain"
+              data-no-lightbox
             />
             <h3 className="text-2xl font-medium">Sending a Flare</h3>
             <p className="mt-2 text-lg text-stone-500">
@@ -121,6 +120,7 @@ export default function CommunityCrisis() {
               src={`${IMG}/Resource_distribution_circle.svg`}
               alt="Resource Distribution icon"
               className="mb-6 size-20 object-contain"
+              data-no-lightbox
             />
             <h3 className="text-2xl font-medium">Resource Distribution</h3>
             <p className="mt-2 text-lg text-stone-500">
@@ -153,6 +153,7 @@ export default function CommunityCrisis() {
               src={`${IMG}/principle_1.svg`}
               alt="Intuition over fluency principle illustration"
               className="mb-4 h-16 w-16"
+              data-no-lightbox
             />
             <h3 className="text-2xl font-medium">Intuition over fluency</h3>
             <p className="mt-3 text-xl text-stone-500">
@@ -172,6 +173,7 @@ export default function CommunityCrisis() {
               src={`${IMG}/principle_2.svg`}
               alt="Momentum not thought principle illustration"
               className="mb-4 h-16 w-16"
+              data-no-lightbox
             />
             <h3 className="text-2xl font-medium">Momentum, not thought</h3>
             <p className="mt-3 text-xl text-stone-500">
@@ -191,6 +193,7 @@ export default function CommunityCrisis() {
               src={`${IMG}/principle_3.svg`}
               alt="Social over personal principle illustration"
               className="mb-4 h-16 w-16"
+              data-no-lightbox
             />
             <h3 className="text-2xl font-medium">Social over personal</h3>
             <p className="mt-3 text-xl text-stone-500">

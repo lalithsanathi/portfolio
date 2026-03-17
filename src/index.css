@@ -36,4 +36,8 @@
     font-synthesis: none;
     text-rendering: optimizeLegibility;
   }
+
+  [data-lightbox] img:not([data-no-lightbox]) {
+    cursor: zoom-in;
+  }
 }
