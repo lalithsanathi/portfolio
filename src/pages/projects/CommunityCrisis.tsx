@@ -30,15 +30,15 @@ export default function CommunityCrisis() {
       {/* ── Context ── */}
       <Container className="mt-20 lg:mt-56">
         <div className="grid grid-cols-12 gap-x-8">
-          <p className="col-span-12 text-3xl lg:col-span-6">
+          <p className="col-span-12 text-3xl lg:col-span-8">
             In a crisis, people instinctively want to support those in need.
+            But people who need help often don't know what's available, and people that can support often don't know how to reach those in need.
           </p>
           <p className="col-span-12 mt-6 text-xl text-stone-600 lg:col-span-6 lg:col-start-1">
-            But people who need help often don't know what's available, and people that can support often don't know how to reach those in need.
           </p>
         </div>
       </Container>
-      {/* <Container className="mt-12">
+      <Container className="mt-12">
         <div className="grid grid-cols-12 gap-4">
           <img
             src={`${IMG}/context.png`}
@@ -46,7 +46,7 @@ export default function CommunityCrisis() {
             className="col-span-12 w-full rounded-2xl"
           />
         </div>
-      </Container> */}
+      </Container>
 
       {/* ── Goal ── */}
       <Container className="mt-20 lg:mt-56">
@@ -64,11 +64,11 @@ export default function CommunityCrisis() {
       {/* ── MVP Scope / Features ── */}
       <Container className="mt-20 lg:mt-56">
         <div className="grid grid-cols-12 gap-x-8">
-          <h2 className="col-span-12 text-3xl">MVP scope</h2>
-          <p className="col-span-12 mt-4 text-xl text-stone-600 lg:col-span-6">
+          <h2 className="col-span-12 text-3xl">Choosing the MVP scope</h2>
+          {/* <p className="col-span-12 mt-4 text-xl text-stone-600 lg:col-span-6">
             I scoped the MVP around three core capabilities — each addressing a
             distinct phase of crisis response.
-          </p>
+          </p> */}
         </div>
       </Container>
       <Container className="mt-16">

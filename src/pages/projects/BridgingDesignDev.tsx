@@ -325,22 +325,22 @@ export default function BridgingDesignDev() {
           <img
             src={`${IMG}/docs-1.png`}
             alt="Design documentation template"
-            className="col-span-6 lg:col-span-5 w-full"
-          />
-          <img
-            src={`${IMG}/docs-5.png`}
-            alt="Developer handoff annotation"
-            className="col-span-6 lg:col-span-2 w-full"
+            className="col-span-6 lg:col-span-6 w-full"
           />
           <img
             src={`${IMG}/docs-2.png`}
             alt="Design specification document"
-            className="col-span-12 lg:col-span-5 lg:row-span-2 w-full"
+            className="col-span-12 lg:col-span-6 lg:row-span-2 w-full"
           />
           <img
             src={`${IMG}/docs-3.png`}
             alt="Component documentation guide"
-            className="col-span-7 lg:col-span-5 w-full"
+            className="col-span-7 lg:col-span-6 w-full"
+          />
+          <img
+            src={`${IMG}/docs-5.png`}
+            alt="Developer handoff annotation"
+            className="col-span-6 lg:col-span-4 w-full"
           />
           <img
             src={`${IMG}/docs-4.png`}

@@ -6,9 +6,9 @@ export default function Home() {
   return (
     <Container className="pb-40" as="main">
       {/* Hero */}
-      <div className="max-w-[680px] mt-48">
+      <div className="max-w-[720px] mt-48">
         <h1 className="font-display text-4xl">
-          I'm a UX designer that writes code. I like turning complex systems into
+          I'm a UX designer with an industrial design background. I turn complex systems into
           playful interactions.
           
           {/* Currently at{' '}

@@ -16,7 +16,7 @@ export default function ProjectSection({
   return (
     <section>
       <h2 className="text-2xl font-semibold uppercase">{heading}</h2>
-      <p className="mt-4 max-w-[640px] text-xl font-regular leading-8">
+      <p className="mt-4 max-w-[640px] text-xl font-regular">
         {description}
       </p>
       <div className="mt-10 flex max-w-[968px] gap-2">

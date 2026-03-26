@@ -157,7 +157,7 @@ export default function MaltedSRM() {
           </p>
           <div className="col-span-12 mt-8 overflow-hidden rounded-2xl bg-stone-200">
             <img
-              src="/images/projects/srm/data-timeline.png"
+              src="/images/projects/malted-srm/data-timeline.png"
               alt="Timeline showing how data extraction connects to downstream workflows including scoping, deep research, and report writing"
               className="w-full"
             />
@@ -268,10 +268,10 @@ export default function MaltedSRM() {
           <h2 className="col-span-12 text-3xl">
             Can't count on confidence scores
           </h2>
-          {/* <p className="col-span-12 mt-4 text-xl lg:col-span-12">
+          <p className="col-span-12 text-xl lg:col-span-12">
             AI ambiguity was a big part of our workflow, so we experimented with
             adding confidence scores to the UI.
-          </p> */}
+          </p>
           <img
             className="col-span-12 mt-8 w-full rounded-2xl lg:col-span-5"
             src="/images/projects/malted-srm/confidence-percent.png"
