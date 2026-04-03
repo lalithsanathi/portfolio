@@ -6,10 +6,9 @@ export default function Home() {
   return (
     <Container className="pb-40" as="main">
       {/* Hero */}
-      <div className="max-w-[720px] mt-48">
+      <div className="max-w-[800px] mt-48">
         <h1 className="font-display text-4xl">
-          I'm a UX designer with an industrial design background. I turn complex systems into
-          playful interactions.
+          Award winning London based product designer building expressive, AI-native products.
           
           {/* Currently at{' '}
           <a href="https://malted.ai" className="text-orange-700">
@@ -79,7 +78,7 @@ export default function Home() {
         />
 
         {/* Side Projects */}
-        {/* <ProjectSection
+        <ProjectSection
           heading="Side projects"
           description="I like to create playful tools and useful toys. The following are a few of my experiments, explorations, and endeavors."
           leftColumn={
@@ -104,7 +103,7 @@ export default function Home() {
               size="tall"
             />
           }
-        /> */}
+        />
       </div>
 
       {/* Bottom fade */}

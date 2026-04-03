@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "ship": "bash scripts/ship.sh",
+    "git:status": "git status",
+    "git:push": "git push"
   },
   "dependencies": {
     "@carbon/icons-react": "^11.76.0",

@@ -2,16 +2,27 @@ import {
   createRouter,
   createRootRoute,
   createRoute,
+  lazyRouteComponent,
   Outlet,
 } from '@tanstack/react-router';
 import Home from './pages/Home';
-import DesignSystem from './pages/DesignSystem';
-import MaltedPulse from './pages/projects/MaltedPulse';
-import MaltedSRM from './pages/projects/MaltedSRM';
-import BridgingDesignDev from './pages/projects/BridgingDesignDev';
-import EmbeddingModels from './pages/projects/EmbeddingModels';
-import CommunityCrisis from './pages/projects/CommunityCrisis';
 import LightboxProvider from './components/Lightbox';
+
+/** Code-split everything except `/` so the first paint does not download all case studies. */
+const DesignSystem = lazyRouteComponent(() => import('./pages/DesignSystem'));
+const MaltedPulse = lazyRouteComponent(
+  () => import('./pages/projects/MaltedPulse'),
+);
+const MaltedSRM = lazyRouteComponent(() => import('./pages/projects/MaltedSRM'));
+const BridgingDesignDev = lazyRouteComponent(
+  () => import('./pages/projects/BridgingDesignDev'),
+);
+const EmbeddingModels = lazyRouteComponent(
+  () => import('./pages/projects/EmbeddingModels'),
+);
+const CommunityCrisis = lazyRouteComponent(
+  () => import('./pages/projects/CommunityCrisis'),
+);
 
 const rootRoute = createRootRoute({
   component: () => (

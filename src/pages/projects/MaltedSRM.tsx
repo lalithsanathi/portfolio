@@ -10,7 +10,7 @@ export default function MaltedSRM() {
           { label: "Company", value: "Malted / S-RM" },
           { label: "Timeframe", value: "Mar — Jul 2025" },
         ]}
-        summary="I owned the end-to-end experience of an AI-powered due diligence tool for S-RM, a global intelligence and cyber security consultancy. Over a 4-month period, we went through the process from discovery to a system that analysts genuinely trusted and wanted to use — demonstrating over £1M in potential annual value. I collaborated closely with ML engineers on the data model and pipeline, building a tool that extracts and structures information from messy, multilingual documents into investigation briefs and final reports."
+        summary="I owned the end-to-end design of an AI-powered due diligence tool for S-RM, a global intelligence and cyber security consultancy. Over a 4-month period, we went from discovery to delivery of a system that analysts genuinely trusted and wanted to use. I worked closely with ML engineers on the data model and pipeline, building a tool that extracts and structures information from messy, multilingual documents into investigation briefs and final reports."
       >
         <div className="col-span-12 mt-12 mb-12 flex flex-wrap gap-x-20 gap-y-12 lg:col-span-7 lg:col-start-5">
           {[
