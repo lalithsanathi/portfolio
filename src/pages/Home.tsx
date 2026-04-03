@@ -6,9 +6,9 @@ export default function Home() {
   return (
     <Container className="pb-40" as="main">
       {/* Hero */}
-      <div className="max-w-[800px] mt-48">
+      <div className="max-w-[760px] mt-48">
         <h1 className="font-display text-4xl">
-          Award winning London based product designer building expressive, AI-native products.
+          Award winning London based product designer with 6+ years of experience building expressive, AI-native products.
           
           {/* Currently at{' '}
           <a href="https://malted.ai" className="text-orange-700">
