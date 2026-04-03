@@ -103,8 +103,8 @@ export default function Home() {
               size="tall"
             />
           }
-        />
-      </div> */}
+        /> */}
+      </div>
 
       {/* Bottom fade */}
       {/* <div className="pointer-events-none fixed inset-x-0 bottom-0 h-64 bg-linear-to-t from-stone-100 to-transparent" /> */}
