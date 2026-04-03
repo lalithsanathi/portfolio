@@ -78,7 +78,7 @@ export default function Home() {
         />
 
         {/* Side Projects */}
-        <ProjectSection
+        {/* <ProjectSection
           heading="Side projects"
           description="I like to create playful tools and useful toys. The following are a few of my experiments, explorations, and endeavors."
           leftColumn={
@@ -104,7 +104,7 @@ export default function Home() {
             />
           }
         />
-      </div>
+      </div> */}
 
       {/* Bottom fade */}
       {/* <div className="pointer-events-none fixed inset-x-0 bottom-0 h-64 bg-linear-to-t from-stone-100 to-transparent" /> */}
