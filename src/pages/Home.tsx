@@ -1,21 +1,36 @@
+import { motion, useReducedMotion } from 'motion/react';
 import Container from '../components/Container';
 import ProjectCard from '../components/ProjectCard';
 import ProjectSection from '../components/ProjectSection';
 
 export default function Home() {
+  const reduceMotion = useReducedMotion();
+
+  const heroInitial = reduceMotion
+    ? false
+    : { opacity: 0, filter: 'blur(12px)', y: 8 };
+  const heroAnimate = reduceMotion
+    ? undefined
+    : { opacity: 1, filter: 'blur(0px)', y: 0 };
+
   return (
     <Container className="pb-40" as="main">
       {/* Hero */}
       <div className="max-w-[760px] mt-48">
-        <h1 className="font-display text-4xl">
+        <motion.h1
+          className="font-display text-4xl text-balance"
+          initial={heroInitial}
+          animate={heroAnimate}
+          transition={{ type: 'spring', duration: 0.7, bounce: 0, delay: 0.1 }}
+        >
           Award winning London based product designer with 6+ years of experience building expressive, AI-native products.
-          
+
           {/* Currently at{' '}
           <a href="https://malted.ai" className="text-orange-700">
             Malted
           </a>
           . */}
-        </h1>
+        </motion.h1>
       </div>
 
       {/* Sections */}

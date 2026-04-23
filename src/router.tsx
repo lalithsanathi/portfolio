@@ -17,6 +17,9 @@ const MaltedSRM = lazyRouteComponent(() => import('./pages/projects/MaltedSRM'))
 const BridgingDesignDev = lazyRouteComponent(
   () => import('./pages/projects/BridgingDesignDev'),
 );
+const BridgingDesignDevV2 = lazyRouteComponent(
+  () => import('./pages/projects/BridgingDesignDevV2'),
+);
 const EmbeddingModels = lazyRouteComponent(
   () => import('./pages/projects/EmbeddingModels'),
 );
@@ -62,6 +65,12 @@ const bridgingDesignDevRoute = createRoute({
   component: BridgingDesignDev,
 });
 
+const bridgingDesignDevV2Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/projects/bridging-design-and-dev-v2',
+  component: BridgingDesignDevV2,
+});
+
 const embeddingModelsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/projects/embedding-models',
@@ -80,6 +89,7 @@ const routeTree = rootRoute.addChildren([
   maltedPulseRoute,
   maltedSRMRoute,
   bridgingDesignDevRoute,
+  bridgingDesignDevV2Route,
   embeddingModelsRoute,
   communityCrisisRoute,
 ]);

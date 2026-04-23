@@ -31,11 +31,9 @@ export default function CommunityCrisis() {
       <Container className="mt-20 lg:mt-56">
         <div className="grid grid-cols-12 gap-x-8">
           <p className="col-span-12 text-3xl lg:col-span-8">
-            In a crisis, people instinctively want to support those in need.
-            But people who need help often don't know what's available, and people that can support often don't know how to reach those in need.
+            When a crisis hits, communities often have no strong resources or infrastructure to be self-resilient.
           </p>
-          <p className="col-span-12 mt-6 text-xl text-stone-600 lg:col-span-6 lg:col-start-1">
-          </p>
+          <p className="col-span-12 mt-6 text-xl text-stone-600 lg:col-span-6 lg:col-start-1"></p>
         </div>
       </Container>
       <Container className="mt-12">
