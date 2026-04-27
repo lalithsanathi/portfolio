@@ -1,12 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   motion,
   useInView,
@@ -14,14 +7,23 @@ import {
   type Variants,
 } from 'motion/react';
 import { markNavProgrammaticScroll } from '../components/SiteNav';
+import { useImagesLoaded } from '../hooks/useImagesLoaded';
 
 interface HomeProject {
   id: string;
   title: string;
   className: string;
   href?: string;
-  image?: ReactNode;
+  imageSrc?: string;
 }
+
+/** Preload targets for the work grid so thumbnails start loading with the route, not after paint. */
+const HOME_PROJECT_IMAGE_URLS = [
+  '/images/home-test/ve03.png',
+  '/images/home-test/dashboard.png',
+  '/images/home-test/phone-mockup.png',
+  '/images/home-test/type-space.png',
+] as const;
 
 const projects: HomeProject[] = [
   {
@@ -29,54 +31,28 @@ const projects: HomeProject[] = [
     title: 'Malted Pulse',
     href: '/projects/malted-pulse',
     className: 'bg-stone-200',
-    image: (
-      <img
-        src="/images/home-test/ve03.png"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover object-center"
-      />
-    ),
+    imageSrc: '/images/home-test/ve03.png',
   },
   {
     id: 'malted-srm',
     title: 'Bringing balance at National Grid',
     href: '/projects/national-grid-intro',
     className: 'bg-stone-200',
-    image: (
-      <>
-        <img
-          src="/images/home-test/dashboard.png"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover object-center"
-        />
-      </>
-    ),
+    imageSrc: '/images/home-test/dashboard.png',
   },
   {
     id: 'community-crisis',
     title: 'A community platform for times of crisis',
     href: '/projects/community-crisis',
     className: 'bg-stone-200',
-    image: (
-      <img
-        src="/images/home-test/phone-mockup.png"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover object-center"
-      />
-    ),
+    imageSrc: '/images/home-test/phone-mockup.png',
   },
   {
     id: 'embedding-models',
     title: 'A visual, Spatial Search for Typefaces',
     href: '/projects/embedding-models',
     className: 'bg-stone-200',
-    image: (
-      <img
-        src="/images/home-test/type-space.png"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover object-center"
-      />
-    ),
+    imageSrc: '/images/home-test/type-space.png',
   },
   {
     id: 'coming-soon-1',
@@ -110,6 +86,7 @@ export default function Home() {
     margin: '-10% 0px',
   });
   const [startsAtTop, setStartsAtTop] = useState<boolean | null>(null);
+  const workImagesReady = useImagesLoaded(HOME_PROJECT_IMAGE_URLS);
 
   const projectContainer = useMemo<Variants>(
     () => ({
@@ -139,6 +116,23 @@ export default function Home() {
     });
 
     return () => cancelAnimationFrame(frame);
+  }, []);
+
+  useLayoutEffect(() => {
+    const links: HTMLLinkElement[] = [];
+    for (const href of HOME_PROJECT_IMAGE_URLS) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = href;
+      document.head.appendChild(link);
+      links.push(link);
+    }
+    return () => {
+      for (const link of links) {
+        link.remove();
+      }
+    };
   }, []);
 
   // When the home page mounts via SPA navigation with a #work hash (e.g. from
@@ -220,18 +214,31 @@ export default function Home() {
         id="work"
         className="mx-auto mt-56 grid w-full max-w-screen-2xl scroll-mt-20 grid-cols-1 gap-4 md:scroll-mt-24 md:grid-cols-2"
         initial="hidden"
-        animate={startsAtTop !== null && projectsInView ? 'visible' : 'hidden'}
+        animate={
+          startsAtTop !== null && projectsInView && workImagesReady
+            ? 'visible'
+            : 'hidden'
+        }
         variants={container}
         style={{ visibility: startsAtTop === null ? 'hidden' : undefined }}
       >
-        {projects.map((project) => {
+        {projects.map((project, index) => {
           const card = (
             <motion.div
               key={project.id}
               variants={item}
               className={`group relative aspect-7/6 overflow-hidden rounded-2xl ${project.className}`}
             >
-              {project.image}
+              {project.imageSrc ? (
+                <img
+                  src={project.imageSrc}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover object-center"
+                  loading="eager"
+                  fetchPriority={index < 2 ? 'high' : 'auto'}
+                  decoding="async"
+                />
+              ) : null}
               <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/5 ring-inset" />
               <span className="sr-only">{project.title}</span>
             </motion.div>
@@ -255,7 +262,7 @@ export default function Home() {
       </motion.section>
 
       {/* Tall dark band: same-route scroll test for `data-nav-theme` / SiteNav sampler */}
-      <section
+      {/* <section
         data-nav-theme="dark"
         aria-label="Dark section (nav theme test)"
         className="mx-auto mt-32 flex min-h-[85vh] w-full max-w-screen-2xl flex-col justify-center rounded-2xl bg-black px-6 py-24 text-[#e5e1c3] md:mt-40 md:px-14 md:py-32 xl:px-20"
@@ -264,7 +271,7 @@ export default function Home() {
           Same-route nav theme test: keep scrolling — the bar should switch to
           the dark treatment over this block, then back to light below.
         </p>
-      </section>
+      </section> */}
 
       <section
         aria-hidden
