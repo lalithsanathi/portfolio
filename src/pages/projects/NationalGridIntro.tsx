@@ -19,12 +19,12 @@ export default function NationalGridIntro() {
     <main className="min-h-screen bg-gray-warm-200 px-6 pb-48 pt-48 md:px-14 md:pt-60 xl:px-20 xl:pt-72 2xl:px-0">
       <section className="mx-auto grid w-full max-w-screen-2xl grid-cols-12">
         <motion.h1
-          className="col-span-12 mb-16 font-display text-[64px] leading-[80px] md:col-span-11 lg:col-span-8"
+          className="col-span-12 mb-16 font-display text-[64px] leading-[80px]"
           initial={heroInitial}
           animate={heroAnimate}
           transition={{ ...spring, delay: 0.2 }}
         >
-          Rebuilding the UK's energy grid balancing platform
+          Designing a new energy grid balancing platform for the UK
         </motion.h1>
 
         <motion.div

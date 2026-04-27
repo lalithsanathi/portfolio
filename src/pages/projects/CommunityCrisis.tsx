@@ -1,23 +1,77 @@
+import { motion, useReducedMotion } from "motion/react";
 import Container from "../../components/Container";
-import CaseStudyHeader from "../../components/CaseStudyHeader";
 
 const IMG = "/images/projects/community-crisis";
 
 export default function CommunityCrisis() {
+  const reduceMotion = useReducedMotion();
+  const heroInitial = reduceMotion
+    ? false
+    : { opacity: 0, filter: "blur(12px)", y: 8 };
+  const heroAnimate = reduceMotion
+    ? undefined
+    : { opacity: 1, filter: "blur(0px)", y: 0 };
+
+  const spring = {
+    type: "spring" as const,
+    duration: 0.7,
+    bounce: 0,
+  };
+
   return (
     <main className="pb-40" data-lightbox>
-      <CaseStudyHeader
-        title="A community platform for times of crisis"
-        meta={[
-          { label: "Type", value: "Side Project" },
-          { label: "Timeframe", value: "2020 — 2020" },
-          { label: "Recognition", value: "Winner of Ford Smart Mobility Fund" },
-        ]}
-        summary="Herd is a platform that I co-designed that helps people maintain their mobility in times of crisis. It connects those in need to other members of their community who can provide help and resources. Users send out a 'flare' from their mobile device, and those who can help respond — enabling the natural instinct we have to help one another in times of nned."
-      />
+      <section className="bg-gray-warm-200 px-6 pb-12 pt-48 md:px-14 md:pb-16 md:pt-60 xl:px-20 xl:pt-72 2xl:px-0">
+        <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-12">
+          <motion.h1
+            className="col-span-12 mb-16 font-display text-[64px] leading-[80px]"
+            initial={heroInitial}
+            animate={heroAnimate}
+            transition={{ ...spring, delay: 0.2 }}
+          >
+            A community platform for times of crisis
+          </motion.h1>
+
+          <motion.div
+            className="col-span-12 flex flex-col gap-7 lg:col-span-3 lg:col-start-1"
+            initial={heroInitial}
+            animate={heroAnimate}
+            transition={{ ...spring, delay: 0.35 }}
+          >
+            {[
+              { label: "Type", value: "Side Project" },
+              { label: "Timeframe", value: "2020 — 2020" },
+              {
+                label: "Recognition",
+                value: "Winner of Ford Smart Mobility Fund",
+              },
+            ].map((item) => (
+              <div key={item.label}>
+                <p className="text-xl font-medium text-black/40">{item.label}</p>
+                <p className="mt-1 text-xl font-medium uppercase text-black/60">
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </motion.div>
+
+          <motion.p
+            className="col-span-12 mt-12 text-xl text-stone-600 lg:col-span-8 lg:col-start-5 lg:mt-0"
+            initial={heroInitial}
+            animate={heroAnimate}
+            transition={{ ...spring, delay: 0.5 }}
+          >
+            Herd is a platform that I co-designed that helps people maintain
+            their mobility in times of crisis. It connects those in need to
+            other members of their community who can provide help and
+            resources. Users send out a &apos;flare&apos; from their mobile
+            device, and those who can help respond — enabling the natural
+            instinct we have to help one another in times of need.
+          </motion.p>
+        </div>
+      </section>
 
       {/* ── Hero image ── */}
-      <Container variant="full" className="mt-16">
+      <Container variant="full" className="mt-0">
         <div className="relative overflow-hidden rounded-2xl h-[600px]">
           <img
             src={`${IMG}/hero2.png`}
@@ -36,7 +90,7 @@ export default function CommunityCrisis() {
           <p className="col-span-12 mt-6 text-xl text-stone-600 lg:col-span-6 lg:col-start-1"></p>
         </div>
       </Container>
-      <Container className="mt-12">
+      <Container variant="full" className="mt-12">
         <div className="grid grid-cols-12 gap-4">
           <img
             src={`${IMG}/context.png`}
