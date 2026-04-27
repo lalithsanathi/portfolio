@@ -22,7 +22,7 @@ export default function CaseStudyHeader({
   children,
 }: CaseStudyHeaderProps) {
   return (
-    <Container className="pt-8 mt-22">
+    <Container className="pt-8 mt-36 md:mt-44 xl:mt-52">
       <Link
         to="/"
         className="inline-flex items-center gap-4 text-2xl uppercase text-stone-500 hover:text-stone-900"

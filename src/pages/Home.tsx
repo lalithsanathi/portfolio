@@ -1,10 +1,130 @@
-import { motion, useReducedMotion } from 'motion/react';
-import Container from '../components/Container';
-import ProjectCard from '../components/ProjectCard';
-import ProjectSection from '../components/ProjectSection';
+import { Link } from '@tanstack/react-router';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+import {
+  motion,
+  useInView,
+  useReducedMotion,
+  type Variants,
+} from 'motion/react';
+import { markNavProgrammaticScroll } from '../components/SiteNav';
+
+interface HomeProject {
+  id: string;
+  title: string;
+  className: string;
+  href?: string;
+  image?: ReactNode;
+}
+
+const projects: HomeProject[] = [
+  {
+    id: 'malted-pulse',
+    title: 'Malted Pulse',
+    href: '/projects/malted-pulse',
+    className: 'bg-stone-200',
+    image: (
+      <img
+        src="/images/home-test/ve03.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover object-center"
+      />
+    ),
+  },
+  {
+    id: 'malted-srm',
+    title: 'Bringing balance at National Grid',
+    href: '/projects/national-grid-intro',
+    className: 'bg-stone-200',
+    image: (
+      <>
+        <img
+          src="/images/home-test/dashboard.png"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+      </>
+    ),
+  },
+  {
+    id: 'community-crisis',
+    title: 'A community platform for times of crisis',
+    href: '/projects/community-crisis',
+    className: 'bg-stone-200',
+    image: (
+      <img
+        src="/images/home-test/phone-mockup.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover object-center"
+      />
+    ),
+  },
+  {
+    id: 'embedding-models',
+    title: 'A visual, Spatial Search for Typefaces',
+    href: '/projects/embedding-models',
+    className: 'bg-stone-200',
+    image: (
+      <img
+        src="/images/home-test/type-space.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover object-center"
+      />
+    ),
+  },
+  {
+    id: 'coming-soon-1',
+    title: 'Coming soon',
+    className: 'bg-stone-200',
+  },
+  {
+    id: 'coming-soon-2',
+    title: 'Coming soon',
+    className: 'bg-stone-200',
+  },
+] as const;
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, filter: 'blur(12px)', y: 8 },
+  visible: {
+    opacity: 1,
+    filter: 'blur(0px)',
+    y: 0,
+    transition: { type: 'spring', duration: 0.6, bounce: 0 },
+  },
+};
+
+const staticVariants: Variants = { hidden: {}, visible: {} };
 
 export default function Home() {
   const reduceMotion = useReducedMotion();
+  const projectGridRef = useRef<HTMLElement>(null);
+  const projectsInView = useInView(projectGridRef, {
+    once: true,
+    margin: '-10% 0px',
+  });
+  const [startsAtTop, setStartsAtTop] = useState<boolean | null>(null);
+
+  const projectContainer = useMemo<Variants>(
+    () => ({
+      hidden: {},
+      visible: {
+        transition: {
+          staggerChildren: 0.08,
+          delayChildren: startsAtTop ? 0.55 : 0.05,
+        },
+      },
+    }),
+    [startsAtTop],
+  );
+  const container = reduceMotion ? staticVariants : projectContainer;
+  const item = reduceMotion ? staticVariants : itemVariants;
 
   const heroInitial = reduceMotion
     ? false
@@ -13,116 +133,145 @@ export default function Home() {
     ? undefined
     : { opacity: 1, filter: 'blur(0px)', y: 0 };
 
+  useLayoutEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setStartsAtTop(!window.location.hash && window.scrollY < 100);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  // When the home page mounts via SPA navigation with a #work hash (e.g. from
+  // clicking the nav's "Work" link on a project page), TanStack's scroll
+  // restoration scrolls to the top. Override that synchronously, before the
+  // first paint, so we land directly on the work section. We also flag the
+  // jump as programmatic so the nav springs to its new resting top instead
+  // of being subject to the |dy| threshold.
+  useLayoutEffect(() => {
+    if (window.location.hash !== '#work') return;
+    const target = document.getElementById('work');
+    if (!target) return;
+    const top =
+      target.getBoundingClientRect().top + window.scrollY - 80;
+    markNavProgrammaticScroll();
+    window.scrollTo({ top, behavior: 'auto' });
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.location.hash === '#work' && window.scrollY < 100) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-    <Container className="pb-40" as="main">
-      {/* Hero */}
-      <div className="max-w-[760px] mt-48">
+    <main className="relative min-h-screen px-6 pb-48 pt-48 md:px-14 md:pt-60 xl:px-20 xl:pt-72 2xl:px-0">
+      <motion.a
+        href="https://www.linkedin.com/in/laliths/"
+        aria-label="LinkedIn"
+        className="absolute right-6 top-16 z-60 -mx-4 flex min-h-12 items-center rounded-full px-4 text-black/80 transition-[color,transform] duration-300 ease-out hover:text-black active:scale-[0.96] md:right-14 md:top-24 xl:right-20 xl:top-30 2xl:right-[calc((100vw-1536px)/2)]"
+        initial={heroInitial}
+        animate={heroAnimate}
+        transition={{ type: 'spring', duration: 0.7, bounce: 0 }}
+      >
+        <span className="-mx-3 flex size-12 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-white/70">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 32 32"
+            className="size-8 fill-current"
+          >
+            <path d="M26 4H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2ZM11.4 24H8.5V13.6h2.9V24ZM10 12.3a1.7 1.7 0 1 1 0-3.4 1.7 1.7 0 0 1 0 3.4ZM24 24h-2.9v-5.1c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7V24h-2.9V13.6h2.8V15h.1a3.1 3.1 0 0 1 2.8-1.6c3 0 3.6 2 3.6 4.6V24Z" />
+          </svg>
+        </span>
+      </motion.a>
+
+      <section className="mx-auto grid w-full max-w-screen-2xl grid-cols-12">
         <motion.h1
-          className="font-display text-4xl text-balance"
+          className="col-span-12 font-display text-[64px] leading-[80px] md:col-span-11 lg:col-span-10"
           initial={heroInitial}
           animate={heroAnimate}
-          transition={{ type: 'spring', duration: 0.7, bounce: 0, delay: 0.1 }}
+          transition={{ type: 'spring', duration: 0.7, bounce: 0, delay: 0.2 }}
         >
-          Award winning London based product designer with 6+ years of experience building expressive, AI-native products.
-
-          {/* Currently at{' '}
-          <a href="https://malted.ai" className="text-orange-700">
-            Malted
-          </a>
-          . */}
+          Award winning London based designer with over 6 years of experience
+          building expressive, AI-native products.
         </motion.h1>
-      </div>
+        <motion.p
+          className="col-span-12 mt-10 text-[28px] font-regular leading-10 text-gray-warm-500 text-pretty md:col-span-10 lg:col-span-8"
+          initial={heroInitial}
+          animate={heroAnimate}
+          transition={{ type: 'spring', duration: 0.7, bounce: 0, delay: 0.4 }}
+        >
+          I mix systems and analogies, and design by building. I’ve made Figma
+          plugins used by hundreds of people, given talks about the future of
+          interaction design, and enjoy mentoring other designers.
+        </motion.p>
+      </section>
 
-      {/* Sections */}
-      <div className="mt-56 flex flex-col gap-40">
-        {/* Malted AI */}
-        <ProjectSection
-          heading="Malted AI"
-          description="Helping financial organisations use small language models to better understand their customer data."
-          leftColumn={
-            <ProjectCard
-              title="Malted Pulse"
-              href="/projects/malted-pulse"
-              size="short"
-              imageSrc="/images/projects/malted-pulse/project-card-image.png"
-              variant="light"
-            />
-          }
-          rightColumn={
-            <ProjectCard
-              title="AI Accelerated Due Diligence"
-              href="/projects/malted-srm"
-              size="tall"
-              imageSrc="/images/projects/malted-srm/project-card-image.png"
-              variant="light"
-            />
-          }
-        />
+      <motion.section
+        ref={projectGridRef}
+        id="work"
+        className="mx-auto mt-56 grid w-full max-w-screen-2xl scroll-mt-20 grid-cols-1 gap-4 md:scroll-mt-24 md:grid-cols-2"
+        initial="hidden"
+        animate={startsAtTop !== null && projectsInView ? 'visible' : 'hidden'}
+        variants={container}
+        style={{ visibility: startsAtTop === null ? 'hidden' : undefined }}
+      >
+        {projects.map((project) => {
+          const card = (
+            <motion.div
+              key={project.id}
+              variants={item}
+              className={`group relative aspect-7/6 overflow-hidden rounded-2xl ${project.className}`}
+            >
+              {project.image}
+              <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/5 ring-inset" />
+              <span className="sr-only">{project.title}</span>
+            </motion.div>
+          );
 
-        {/* IBM / National Grid */}
-        <ProjectSection
-          heading="IBM / National Grid"
-          description="Revolutionising the platform that balances the energy grid for the UK and beyond, and enabling the UK's goal to become net zero by 2050."
-          leftColumn={
-            <>
-              <ProjectCard
-                title="Bridging Design and Dev"
-                href="/projects/bridging-design-and-dev"
-                size="tall"
-                imageSrc="/images/projects/ibm-ng-ds/project-card-image.png"
-                variant="dark"
-              />
-              {/* <ProjectCard title="Unifying our data vis" size="short" /> */}
-            </>
+          if (!project.href) {
+            return card;
           }
-          rightColumn={
-            <>
-              <ProjectCard
-                title="COMING SOON"
-                size="short"
-                imageSrc="/images/projects/ibm-ng-keyboard/project-card-image.png"
-                variant="dark"
-                className="opacity-60 pointer-events-none"
-              />
-              {/* <ProjectCard
-                title="Demystifying Daylight savings"
-                size="short"
-              /> */}
-            </>
-          }
-        />
 
-        {/* Side Projects */}
-        {/* <ProjectSection
-          heading="Side projects"
-          description="I like to create playful tools and useful toys. The following are a few of my experiments, explorations, and endeavors."
-          leftColumn={
-            <>
-              <ProjectCard
-                title="Embedding models for user research"
-                href="/projects/embedding-models"
-                size="short"
-                imageSrc="/images/projects/side-embedding-models.png"
-                variant="dark"
-              />
-              <ProjectCard
-                title="A visual, Spatial Search for Typefaces"
-                size="short"
-              />
-            </>
-          }
-          rightColumn={
-            <ProjectCard
-              title="A community platform for times of crisis"
-              href="/projects/community-crisis"
-              size="tall"
-            />
-          }
-        /> */}
-      </div>
+          return (
+            <Link
+              key={project.id}
+              to={project.href}
+              className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
+              aria-label={project.title}
+            >
+              {card}
+            </Link>
+          );
+        })}
+      </motion.section>
 
-      {/* Bottom fade */}
-      {/* <div className="pointer-events-none fixed inset-x-0 bottom-0 h-64 bg-linear-to-t from-stone-100 to-transparent" /> */}
-    </Container>
+      {/* Tall dark band: same-route scroll test for `data-nav-theme` / SiteNav sampler */}
+      <section
+        data-nav-theme="dark"
+        aria-label="Dark section (nav theme test)"
+        className="mx-auto mt-32 flex min-h-[85vh] w-full max-w-screen-2xl flex-col justify-center rounded-2xl bg-black px-6 py-24 text-[#e5e1c3] md:mt-40 md:px-14 md:py-32 xl:px-20"
+      >
+        <p className="max-w-2xl text-pretty text-2xl font-medium leading-snug md:text-3xl md:leading-tight">
+          Same-route nav theme test: keep scrolling — the bar should switch to
+          the dark treatment over this block, then back to light below.
+        </p>
+      </section>
+
+      <section
+        aria-hidden
+        className="mx-auto mt-16 w-full max-w-screen-2xl pb-32 md:mt-24 md:pb-40"
+      >
+        <div className="h-24 rounded-2xl bg-gray-warm-100 md:h-32" />
+      </section>
+    </main>
   );
 }

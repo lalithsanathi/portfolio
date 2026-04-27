@@ -43,3 +43,86 @@
     cursor: zoom-in;
   }
 }
+
+@layer components {
+  .liquid-glass-capsule {
+    border-radius: 999px;
+    isolation: isolate;
+    transform: translateZ(0);
+    box-shadow:
+      0 8px 22px rgba(29, 28, 26, 0.055),
+      0 2px 8px rgba(29, 28, 26, 0.035);
+    transition: box-shadow 260ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .liquid-glass-capsule::before,
+  .liquid-glass-capsule::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .liquid-glass-capsule::before {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    transform: translateZ(0);
+    transition: background 260ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .liquid-glass-capsule::after {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05) 38%, rgba(255, 255, 255, 0.14)),
+      radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.5), transparent 34%),
+      radial-gradient(circle at 82% 86%, rgba(255, 255, 255, 0.18), transparent 38%);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+      inset 1px 1px 0 rgba(255, 255, 255, 0.55),
+      inset -10px -10px 22px rgba(29, 28, 26, 0.04);
+    opacity: 0.95;
+    transition:
+      background 260ms cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 260ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .liquid-glass-capsule[data-theme="dark"] {
+    box-shadow:
+      0 8px 22px rgba(29, 28, 26, 0.16),
+      0 2px 8px rgba(29, 28, 26, 0.09);
+  }
+
+  .liquid-glass-capsule[data-theme="dark"]::before {
+    background: rgba(70, 68, 64, 0.58);
+    background: color-mix(
+      in srgb,
+      var(--color-gray-warm-700) 58%,
+      transparent
+    );
+  }
+
+  .liquid-glass-capsule[data-theme="dark"]::after {
+    background:
+      linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.028),
+        rgba(255, 255, 255, 0.006) 40%,
+        rgba(255, 255, 255, 0.016)
+      ),
+      radial-gradient(
+        circle at 18% 14%,
+        rgba(255, 255, 255, 0.045),
+        transparent 46%
+      ),
+      radial-gradient(
+        circle at 82% 86%,
+        rgba(255, 255, 255, 0.014),
+        transparent 48%
+      );
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+      inset 1px 1px 0 rgba(255, 255, 255, 0.22),
+      inset -10px -10px 22px rgba(0, 0, 0, 0.25);
+  }
+}

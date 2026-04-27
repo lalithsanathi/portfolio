@@ -4,9 +4,48 @@ import {
   createRoute,
   lazyRouteComponent,
   Outlet,
+  useRouterState,
 } from '@tanstack/react-router';
+import { motion, useReducedMotion } from 'motion/react';
 import Home from './pages/Home';
+import About from './pages/About';
 import LightboxProvider from './components/Lightbox';
+import SiteNav from './components/SiteNav';
+import { ROUTE_BG_CROSSFADE_S, ROUTE_SHELL_WARM } from './routeShell';
+
+/** Full-viewport shell so /about (black) and other routes (warm) cross-fade instead of snapping. */
+function RouteBackground() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const reduceMotion = useReducedMotion();
+  const isAbout = pathname === '/about';
+
+  return (
+    <motion.div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-0"
+      initial={false}
+      animate={{
+        backgroundColor: isAbout ? '#000000' : ROUTE_SHELL_WARM,
+      }}
+      transition={{
+        duration: reduceMotion ? 0 : ROUTE_BG_CROSSFADE_S,
+        ease: [0.2, 0, 0, 1],
+      }}
+    />
+  );
+}
+
+function RootLayout() {
+  return (
+    <LightboxProvider>
+      <RouteBackground />
+      <div className="relative z-10 min-h-screen">
+        <SiteNav />
+        <Outlet />
+      </div>
+    </LightboxProvider>
+  );
+}
 
 /** Code-split everything except `/` so the first paint does not download all case studies. */
 const DesignSystem = lazyRouteComponent(() => import('./pages/DesignSystem'));
@@ -20,6 +59,9 @@ const BridgingDesignDev = lazyRouteComponent(
 const BridgingDesignDevV2 = lazyRouteComponent(
   () => import('./pages/projects/BridgingDesignDevV2'),
 );
+const NationalGridIntro = lazyRouteComponent(
+  () => import('./pages/projects/NationalGridIntro'),
+);
 const EmbeddingModels = lazyRouteComponent(
   () => import('./pages/projects/EmbeddingModels'),
 );
@@ -28,17 +70,19 @@ const CommunityCrisis = lazyRouteComponent(
 );
 
 const rootRoute = createRootRoute({
-  component: () => (
-    <LightboxProvider>
-      <Outlet />
-    </LightboxProvider>
-  ),
+  component: RootLayout,
 });
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: Home,
+});
+
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: About,
 });
 
 const designSystemRoute = createRoute({
@@ -71,6 +115,12 @@ const bridgingDesignDevV2Route = createRoute({
   component: BridgingDesignDevV2,
 });
 
+const nationalGridIntroRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/projects/national-grid-intro',
+  component: NationalGridIntro,
+});
+
 const embeddingModelsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/projects/embedding-models',
@@ -85,11 +135,13 @@ const communityCrisisRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
+  aboutRoute,
   designSystemRoute,
   maltedPulseRoute,
   maltedSRMRoute,
   bridgingDesignDevRoute,
   bridgingDesignDevV2Route,
+  nationalGridIntroRoute,
   embeddingModelsRoute,
   communityCrisisRoute,
 ]);

@@ -26,7 +26,7 @@ function Swatch({ label, className }: { label: string; className: string }) {
 
 export default function DesignSystem() {
   return (
-    <div className="min-h-screen px-8 py-16 max-w-4xl">
+    <div className="min-h-screen px-8 pb-16 pt-36 md:pt-44 xl:pt-52 max-w-4xl">
       <h1 className="font-display text-4xl mb-16">Design System</h1>
 
       {/* Fonts */}

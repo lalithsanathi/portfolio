@@ -62,43 +62,43 @@ export default function CommunityCrisis() {
       {/* ── MVP Scope / Features ── */}
       <Container className="mt-20 lg:mt-56">
         <div className="grid grid-cols-12 gap-x-8">
-          <h2 className="col-span-12 text-3xl">Choosing the MVP scope</h2>
-          {/* <p className="col-span-12 mt-4 text-xl text-stone-600 lg:col-span-6">
-            I scoped the MVP around three core capabilities — each addressing a
+          <h2 className="col-span-12 text-3xl">Figuring out the right thing to build</h2>
+          <p className="col-span-12 mt-4 text-xl text-stone-600 lg:col-span-6">
+            We explored different areas of focus and identified three areas of high opportunity — each addressing a
             distinct phase of crisis response.
-          </p> */}
+          </p>
         </div>
       </Container>
       <Container className="mt-16">
         <div className="grid grid-cols-12 gap-x-16 gap-y-12">
           <div className="col-span-12 md:col-span-4">
-            <img
-              src={`${IMG}/golden_moment_citcle.png`}
+            {/* <img
+              src={`${IMG}/golden-moment.svg`}
               alt="The Golden Moment icon"
-              className="mb-6 size-20 object-contain"
+              className="mb-6 size-full object-contain"
               data-no-lightbox
-            />
+            /> */}
             <h3 className="text-2xl font-medium">The Golden Moment</h3>
             <p className="mt-2 text-lg text-stone-500">
               The period of time when self-help is most crucial.
             </p>
             <ul className="mt-4 list-disc list-outside text-xl text-stone-600 ml-5">
-              <li className="my-2">Use real-time data to warn users</li>
+              <li className="my-2">Early warning signals pulled from sensor networks and weather data </li>
               <li className="my-2">
-                Recommend actions in line with a flood timeline
+                Recommendation of personal actions and resources in line with a flood timeline
               </li>
               <li className="my-2">
-                Present new options for mobility as the flood evolves
+                New options for mobility as the flood evolves
               </li>
             </ul>
           </div>
           <div className="col-span-12 md:col-span-4">
-            <img
+            {/* <img
               src={`${IMG}/Sending_Flare_Circle.png`}
               alt="Sending a Flare icon"
               className="mb-6 size-20 object-contain"
               data-no-lightbox
-            />
+            /> */}
             <h3 className="text-2xl font-medium">Sending a Flare</h3>
             <p className="mt-2 text-lg text-stone-500">
               A rapid request for assistance.
@@ -114,12 +114,12 @@ export default function CommunityCrisis() {
             </ul>
           </div>
           <div className="col-span-12 md:col-span-4">
-            <img
+            {/* <img
               src={`${IMG}/Resource_distribution_circle.svg`}
               alt="Resource Distribution icon"
               className="mb-6 size-20 object-contain"
               data-no-lightbox
-            />
+            /> */}
             <h3 className="text-2xl font-medium">Resource Distribution</h3>
             <p className="mt-2 text-lg text-stone-500">
               Improving the mobility of necessary items.
@@ -147,12 +147,12 @@ export default function CommunityCrisis() {
 
         <div className="mt-20 grid grid-cols-1 gap-x-12 gap-y-16 lg:grid-cols-3">
           <div className="flex flex-col gap-2">
-            <img
+            {/* <img
               src={`${IMG}/principle_1.svg`}
               alt="Intuition over fluency principle illustration"
               className="mb-4 h-16 w-16"
               data-no-lightbox
-            />
+            /> */}
             <h3 className="text-2xl font-medium">Intuition over fluency</h3>
             <p className="mt-3 text-xl text-stone-500">
               This service is likely to be used most often by people new to it
@@ -167,12 +167,12 @@ export default function CommunityCrisis() {
             </ul>
           </div>
           <div className="flex flex-col gap-2">
-            <img
+            {/* <img
               src={`${IMG}/principle_2.svg`}
               alt="Momentum not thought principle illustration"
               className="mb-4 h-16 w-16"
               data-no-lightbox
-            />
+            /> */}
             <h3 className="text-2xl font-medium">Momentum, not thought</h3>
             <p className="mt-3 text-xl text-stone-500">
               The interface must make action as simple and easy as possible. In
@@ -187,12 +187,12 @@ export default function CommunityCrisis() {
             </ul>
           </div>
           <div className="flex flex-col gap-2">
-            <img
+            {/* <img
               src={`${IMG}/principle_3.svg`}
               alt="Social over personal principle illustration"
               className="mb-4 h-16 w-16"
               data-no-lightbox
-            />
+            /> */}
             <h3 className="text-2xl font-medium">Social over personal</h3>
             <p className="mt-3 text-xl text-stone-500">
               Primarily being a social service, the user must be encouraged to

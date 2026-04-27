@@ -1,5 +1,8 @@
 import { Launch } from "@carbon/icons-react";
 import CaseStudyHeader from "../../components/CaseStudyHeader";
+import Container from "../../components/Container";
+
+const IMG = "/images/projects/malted-pulse";
 
 export default function MaltedPulse() {
   return (
@@ -22,6 +25,30 @@ export default function MaltedPulse() {
           <Launch size={28} />
         </a>
       </CaseStudyHeader>
+
+      <Container variant="full" className="mt-16">
+        <img
+          src={`${IMG}/outcome-reporting.jpg`}
+          alt="Pulse outcome reporting: dashboards and data views for case outcomes"
+          className="w-full rounded-2xl"
+        />
+      </Container>
+
+      <Container variant="full" className="mt-8">
+        <img
+          src={`${IMG}/dashboard.jpg`}
+          alt="Pulse dashboard"
+          className="w-full rounded-2xl"
+        />
+      </Container>
+
+      <Container variant="full" className="mt-8">
+        <img
+          src={`${IMG}/component-work.jpg`}
+          alt="Component library and UI patterns for Pulse in Figma"
+          className="w-full rounded-2xl"
+        />
+      </Container>
 
       {/* ── Hero image ── */}
       {/* <Container variant="full" className="mt-16">
