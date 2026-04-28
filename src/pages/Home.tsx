@@ -132,6 +132,8 @@ const HERO_HEADING_STAGGER_SPAN =
 const HERO_POST_HEADING_DELAY =
   HERO_HEADING_DELAY_CHILDREN + 0.8 * HERO_HEADING_STAGGER_SPAN;
 const HERO_SUBTEXT_DELAY = HERO_POST_HEADING_DELAY + 0.15;
+/** Full-session hero: grid must start after subtext, not alongside it (was tied to post-heading only). */
+const HERO_GRID_DELAY_AFTER_SUBTEXT = 0.24;
 const WORK_HASH_GRID_REVEAL_DELAY_MS = 180;
 
 const heroWordVariants: Variants = {
@@ -162,7 +164,7 @@ function makeGridContainerVariants(
 ): Variants {
   if (reduceMotion) return staticVariants;
   const delayChildren = useDeferredHeroTiming
-    ? (HERO_POST_HEADING_DELAY + (startsAtTop ? 0.12 : 0.05)) as number
+    ? (HERO_SUBTEXT_DELAY + HERO_GRID_DELAY_AFTER_SUBTEXT) as number
     : ((startsAtTop ? 0.55 : 0.05) as number);
   return {
     hidden: {},
