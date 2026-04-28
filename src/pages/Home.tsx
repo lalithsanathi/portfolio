@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   motion,
   useInView,
@@ -78,6 +78,71 @@ const itemVariants: Variants = {
 
 const staticVariants: Variants = { hidden: {}, visible: {} };
 
+interface ProjectCardProps {
+  project: HomeProject;
+  index: number;
+  isInView: boolean;
+  startsAtTop: boolean | null;
+  reduceMotion: boolean | null;
+}
+
+function ProjectCard({
+  project,
+  index,
+  isInView,
+  startsAtTop,
+  reduceMotion,
+}: ProjectCardProps) {
+  const imageReady = useImagesLoaded(
+    project.imageSrc ? [project.imageSrc] : [],
+    Boolean(project.imageSrc),
+  );
+  const canReveal =
+    startsAtTop !== null && isInView && (!project.imageSrc || imageReady);
+  const animate = canReveal || reduceMotion ? 'visible' : 'hidden';
+  const transitionDelay = (startsAtTop ? 0.55 : 0.05) + index * 0.08;
+  const card = (
+    <motion.div
+      variants={reduceMotion ? staticVariants : itemVariants}
+      initial="hidden"
+      animate={animate}
+      transition={
+        reduceMotion
+          ? undefined
+          : { type: 'spring', duration: 0.6, bounce: 0, delay: transitionDelay }
+      }
+      className={`group relative aspect-7/6 overflow-hidden rounded-2xl ${project.className}`}
+    >
+      {project.imageSrc ? (
+        <img
+          src={project.imageSrc}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          loading={index < 2 ? 'eager' : 'lazy'}
+          fetchPriority={index < 2 ? 'high' : 'auto'}
+          decoding="async"
+        />
+      ) : null}
+      <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/5 ring-inset" />
+      <span className="sr-only">{project.title}</span>
+    </motion.div>
+  );
+
+  if (!project.href) {
+    return card;
+  }
+
+  return (
+    <Link
+      to={project.href}
+      className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
+      aria-label={project.title}
+    >
+      {card}
+    </Link>
+  );
+}
+
 export default function Home() {
   const reduceMotion = useReducedMotion();
   const projectGridRef = useRef<HTMLElement>(null);
@@ -86,22 +151,6 @@ export default function Home() {
     margin: '-10% 0px',
   });
   const [startsAtTop, setStartsAtTop] = useState<boolean | null>(null);
-  const workImagesReady = useImagesLoaded(HOME_PROJECT_IMAGE_URLS);
-
-  const projectContainer = useMemo<Variants>(
-    () => ({
-      hidden: {},
-      visible: {
-        transition: {
-          staggerChildren: 0.08,
-          delayChildren: startsAtTop ? 0.55 : 0.05,
-        },
-      },
-    }),
-    [startsAtTop],
-  );
-  const container = reduceMotion ? staticVariants : projectContainer;
-  const item = reduceMotion ? staticVariants : itemVariants;
 
   const heroInitial = reduceMotion
     ? false
@@ -213,52 +262,18 @@ export default function Home() {
         ref={projectGridRef}
         id="work"
         className="mx-auto mt-56 grid w-full max-w-screen-2xl scroll-mt-20 grid-cols-1 gap-4 md:scroll-mt-24 md:grid-cols-2"
-        initial="hidden"
-        animate={
-          startsAtTop !== null && projectsInView && workImagesReady
-            ? 'visible'
-            : 'hidden'
-        }
-        variants={container}
         style={{ visibility: startsAtTop === null ? 'hidden' : undefined }}
       >
-        {projects.map((project, index) => {
-          const card = (
-            <motion.div
-              key={project.id}
-              variants={item}
-              className={`group relative aspect-7/6 overflow-hidden rounded-2xl ${project.className}`}
-            >
-              {project.imageSrc ? (
-                <img
-                  src={project.imageSrc}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover object-center"
-                  loading="eager"
-                  fetchPriority={index < 2 ? 'high' : 'auto'}
-                  decoding="async"
-                />
-              ) : null}
-              <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/5 ring-inset" />
-              <span className="sr-only">{project.title}</span>
-            </motion.div>
-          );
-
-          if (!project.href) {
-            return card;
-          }
-
-          return (
-            <Link
-              key={project.id}
-              to={project.href}
-              className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
-              aria-label={project.title}
-            >
-              {card}
-            </Link>
-          );
-        })}
+        {projects.map((project, index) => (
+          <ProjectCard
+            key={project.id}
+            project={project}
+            index={index}
+            isInView={projectsInView}
+            startsAtTop={startsAtTop}
+            reduceMotion={reduceMotion}
+          />
+        ))}
       </motion.section>
 
       {/* Tall dark band: same-route scroll test for `data-nav-theme` / SiteNav sampler */}
@@ -273,12 +288,12 @@ export default function Home() {
         </p>
       </section> */}
 
-      <section
+      {/* <section
         aria-hidden
         className="mx-auto mt-16 w-full max-w-screen-2xl pb-32 md:mt-24 md:pb-40"
       >
         <div className="h-24 rounded-2xl bg-gray-warm-100 md:h-32" />
-      </section>
+      </section> */}
     </main>
   );
 }

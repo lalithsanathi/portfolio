@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState } from 'react';
 
 /**
- * Resolves when every URL has loaded (onerror still resolves so a broken image does not block UI forever).
+ * Resolves when every URL has loaded and decoded (onerror still resolves so a broken image does not block UI forever).
  */
 export function useImagesLoaded(urls: readonly string[], enabled = true) {
   const hrefKey = urls.join('|');
@@ -20,7 +20,9 @@ export function useImagesLoaded(urls: readonly string[], enabled = true) {
       (src) =>
         new Promise<void>((resolve) => {
           const img = new Image();
-          img.onload = () => resolve();
+          img.onload = () => {
+            void img.decode().then(resolve).catch(resolve);
+          };
           img.onerror = () => resolve();
           img.src = src;
         }),
