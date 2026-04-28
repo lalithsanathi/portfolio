@@ -56,7 +56,7 @@
   }
 
   .liquid-glass-capsule::before,
-  .liquid-glass-capsule::after {
+  .liquid-glass-capsule-surface {
     content: "";
     position: absolute;
     inset: 0;
@@ -65,26 +65,29 @@
   }
 
   .liquid-glass-capsule::before {
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.001);
     backdrop-filter: blur(20px) saturate(1.8);
     -webkit-backdrop-filter: blur(20px) saturate(1.8);
     transform: translateZ(0);
     transition: background 260ms cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .liquid-glass-capsule::after {
+  .liquid-glass-capsule-surface {
     background:
       linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05) 38%, rgba(255, 255, 255, 0.14)),
       radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.5), transparent 34%),
-      radial-gradient(circle at 82% 86%, rgba(255, 255, 255, 0.18), transparent 38%);
+      radial-gradient(circle at 82% 86%, rgba(255, 255, 255, 0.18), transparent 38%),
+      rgba(255, 255, 255, 0.6);
     box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.5),
       inset 1px 1px 0 rgba(255, 255, 255, 0.55),
       inset -10px -10px 22px rgba(29, 28, 26, 0.04);
+    filter: blur(var(--nav-pill-visual-blur, 0px));
     opacity: 0.95;
     transition:
       background 260ms cubic-bezier(0.2, 0, 0, 1),
-      box-shadow 260ms cubic-bezier(0.2, 0, 0, 1);
+      box-shadow 260ms cubic-bezier(0.2, 0, 0, 1),
+      filter var(--nav-pill-visual-blur-duration, 300ms) cubic-bezier(0.2, 0, 0, 1) var(--nav-pill-visual-blur-delay, 0ms);
   }
 
   .liquid-glass-capsule[data-theme="dark"] {
@@ -94,15 +97,10 @@
   }
 
   .liquid-glass-capsule[data-theme="dark"]::before {
-    background: rgba(70, 68, 64, 0.58);
-    background: color-mix(
-      in srgb,
-      var(--color-gray-warm-700) 58%,
-      transparent
-    );
+    background: rgba(255, 255, 255, 0.001);
   }
 
-  .liquid-glass-capsule[data-theme="dark"]::after {
+  .liquid-glass-capsule[data-theme="dark"] .liquid-glass-capsule-surface {
     background:
       linear-gradient(
         135deg,
@@ -119,10 +117,45 @@
         circle at 82% 86%,
         rgba(255, 255, 255, 0.014),
         transparent 48%
+      ),
+      rgba(70, 68, 64, 0.58);
+    background:
+      linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.028),
+        rgba(255, 255, 255, 0.006) 40%,
+        rgba(255, 255, 255, 0.016)
+      ),
+      radial-gradient(
+        circle at 18% 14%,
+        rgba(255, 255, 255, 0.045),
+        transparent 46%
+      ),
+      radial-gradient(
+        circle at 82% 86%,
+        rgba(255, 255, 255, 0.014),
+        transparent 48%
+      ),
+      color-mix(
+        in srgb,
+        var(--color-gray-warm-700) 58%,
+        transparent
       );
     box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.18),
       inset 1px 1px 0 rgba(255, 255, 255, 0.22),
       inset -10px -10px 22px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/**
+ * Only when `min-width: 1536px` (Tailwind `2xl`): centered `max-w-screen-2xl`
+ * leaves almost no gutter just above that width. Keep a 24px safety gutter until
+ * the viewport can fit a full 1536px grid plus 48px of margin; after that,
+ * padding goes to 0 so the grid still runs full-width on wide monitors.
+ */
+@layer utilities {
+  .px-page-edge-2xl {
+    padding-inline: min(1.5rem, max(0px, calc(1584px - 100vw)));
   }
 }

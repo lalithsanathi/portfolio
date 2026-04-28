@@ -5,7 +5,7 @@ type ContainerVariant = "default" | "full";
 
 const variantClasses: Record<ContainerVariant, string> = {
   default:
-    "mx-auto w-full max-w-screen-2xl px-6 md:px-14 xl:px-20 2xl:px-0",
+    "mx-auto w-full max-w-screen-2xl px-10 lg:px-20 2xl:px-page-edge-2xl",
   full: "mx-auto w-full max-w-screen-2xl px-0",
 };
 

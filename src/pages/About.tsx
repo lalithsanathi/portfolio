@@ -41,9 +41,9 @@ export default function About() {
   return (
     <main
       data-nav-theme="dark"
-      className="min-h-screen overflow-hidden px-6 pb-28 text-[#e5e1c3] md:px-14 md:pb-40 xl:px-20 2xl:px-0"
+      className="min-h-screen overflow-hidden px-10 pb-28 text-[#e5e1c3] md:pb-40 lg:px-20 2xl:px-page-edge-2xl"
     >
-      <section className="relative mx-auto flex min-h-[830px] w-full max-w-screen-2xl flex-col items-center pt-44 md:min-h-[1180px] md:pt-52 xl:min-h-[1360px] xl:pt-[272px]">
+      <section className="relative mx-auto flex min-h-[830px] w-full max-w-screen-2xl flex-col items-center pt-44 md:min-h-[1180px] md:pt-44 xl:min-h-[1360px] xl:pt-[272px]">
         <motion.h1
           className="relative z-0 text-balance bg-[linear-gradient(167deg,rgba(0,0,0,0)_24%,rgba(0,0,0,0.5)_74%),linear-gradient(90deg,#cdcab0,#cdcab0)] bg-clip-text text-center font-display text-[58px] leading-none text-transparent md:text-[104px] xl:text-[120px]"
           initial={heroInitial}

@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type MouseEvent,
 } from 'react';
 import {
@@ -17,6 +18,8 @@ import {
   useMotionValue,
   useReducedMotion,
 } from 'motion/react';
+import { ROUTE_BG_CROSSFADE_S } from '../routeShell';
+import { getWorkScrollOffset } from '../utils/workScroll';
 
 const navSpring = {
   type: 'spring' as const,
@@ -27,8 +30,7 @@ const navSpring = {
 
 /** Interval between each nav item’s layout shift (lead → Work → About). */
 const NAV_CLUSTER_LAYOUT_STAGGER_S = 0.029;
-
-const NAV_HEIGHT_OFFSET = 96;
+const NAV_PILL_AFTER_MOVEMENT_DELAY_S = 0.26;
 
 /** Default jump threshold (px). The tuner overlay can override this at runtime
  *  without remounting the scroll listener (see `jumpThresholdRef`). */
@@ -69,20 +71,30 @@ export function setNavThemeOverride(theme: NavTheme | null) {
 }
 
 /**
- * Vertical positions per breakpoint, in px:
- *   - initialTop matches the spacer the home page used to render before the
- *     nav (`h-16 md:h-24 xl:h-30`).
- *   - stuckTop matches the home page's `sticky top-4 md:top-6` resting
- *     position when scrolled.
+ * Vertical positions per breakpoint, in px — also tune hero `padding-top` /
+ * section gaps on Home + shells; nav offset alone is not enough.
+ *
+ *   - `xl` (Tailwind 1280–1535): tighter rail when the layout still breathes in px.
+ *   - `2xl` (1536+): generous top — wide monitors; do not shrink this when tuning xl.
+ *   - initialTop aligns with Home LinkedIn (`top-16` / `md:top-12` / `xl:top-16` / `2xl:top-30`).
+ *   - stuckTop is the pinned inset — always **24px** (`top-6`), same as the
+ *     original 2xl sticky design, regardless of initialTop / breakpoint.
  *
  * The nav linearly slides between these two via scroll position so it feels
  * like a sticky element without actually being sticky in the DOM (the nav is
  * persistent at the root of the app, so CSS sticky cannot work here).
  */
+/** Pinned `y` when scrolled — matches original wide layout (`top-6`). */
+const NAV_STUCK_TOP_PX = 24;
+
 const NAV_BREAKPOINTS = {
-  sm: { initialTop: 64, stuckTop: 16 },
-  md: { initialTop: 96, stuckTop: 24 },
-  xl: { initialTop: 120, stuckTop: 24 },
+  sm: { initialTop: 64, stuckTop: NAV_STUCK_TOP_PX },
+  /** 768–1279: tighter than `xl` — wider screens get more air below the chrome */
+  md: { initialTop: 48, stuckTop: NAV_STUCK_TOP_PX },
+  /** 1280–1535 (mouse): roomier resting rail than `md` */
+  xl: { initialTop: 64, stuckTop: NAV_STUCK_TOP_PX },
+  /** 1536+: full desktop — generous nav top on large monitors */
+  '2xl': { initialTop: 120, stuckTop: NAV_STUCK_TOP_PX },
 } as const;
 
 type Breakpoint = keyof typeof NAV_BREAKPOINTS;
@@ -98,7 +110,16 @@ type NavHoverPillRect = {
 
 function getBreakpoint(): Breakpoint {
   if (typeof window === 'undefined') return 'sm';
-  if (window.matchMedia('(min-width: 1280px)').matches) return 'xl';
+  // Tailwind `2xl` (1536px+): mouse-first desktops / very wide viewports — own vertical rail.
+  if (window.matchMedia('(min-width: 1536px)').matches) {
+    return '2xl';
+  }
+  if (window.matchMedia('(min-width: 1280px)').matches) {
+    // iPad Pro (and similar) are ≥1280px wide in landscape but should not use the
+    // xl desktop rail — coarse pointer distinguishes touch-first from mouse-first.
+    if (window.matchMedia('(pointer: coarse)').matches) return 'md';
+    return 'xl';
+  }
   if (window.matchMedia('(min-width: 768px)').matches) return 'md';
   return 'sm';
 }
@@ -130,13 +151,20 @@ function smoothScrollTo(targetTop: number, durationMs = 1200) {
   };
 }
 
+/** Scroll + resize theme sampling runs on window; scroll is delegated to SiteNav's
+ *  passive listener via `scheduleThemeSample` so hit-testing fires at most once per
+ *  scroll event path (fewer observers + identical timing). */
 function useNavTheme(
   navClusterRef: React.RefObject<HTMLDivElement | null>,
   pathname: string,
 ) {
   const [theme, setTheme] = useState<NavTheme>(navThemeOverride ?? 'light');
+  const themeSnapshotRef = useRef(theme);
+  themeSnapshotRef.current = theme;
   const [overrideVersion, setOverrideVersion] = useState(0);
   const overrideRef = useRef<NavTheme | null>(navThemeOverride);
+
+  const scheduleThemeSampleRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const onOverrideChange = (nextOverride: NavTheme | null) => {
@@ -158,13 +186,18 @@ function useNavTheme(
       frame = null;
 
       if (overrideRef.current !== null) {
-        setTheme(overrideRef.current);
+        const o = overrideRef.current;
+        if (o !== themeSnapshotRef.current) {
+          setTheme(o);
+        }
         return;
       }
 
       const cluster = navClusterRef.current;
       if (!cluster) {
-        setTheme('light');
+        if (themeSnapshotRef.current !== 'light') {
+          setTheme('light');
+        }
         return;
       }
 
@@ -179,7 +212,11 @@ function useNavTheme(
         .map((element) => element.closest<HTMLElement>('[data-nav-theme]'))
         .find((element): element is HTMLElement => element != null);
 
-      setTheme(themedElement?.dataset.navTheme === 'dark' ? 'dark' : 'light');
+      const next: NavTheme =
+        themedElement?.dataset.navTheme === 'dark' ? 'dark' : 'light';
+      if (next !== themeSnapshotRef.current) {
+        setTheme(next);
+      }
     };
 
     const scheduleSample = () => {
@@ -187,19 +224,24 @@ function useNavTheme(
       frame = requestAnimationFrame(sampleTheme);
     };
 
+    scheduleThemeSampleRef.current = scheduleSample;
+
     sampleTheme();
     scheduleSample();
-    window.addEventListener('scroll', scheduleSample, { passive: true });
     window.addEventListener('resize', scheduleSample);
 
     return () => {
-      window.removeEventListener('scroll', scheduleSample);
       window.removeEventListener('resize', scheduleSample);
       if (frame !== null) cancelAnimationFrame(frame);
+      scheduleThemeSampleRef.current = () => {};
     };
   }, [navClusterRef, overrideVersion, pathname]);
 
-  return theme;
+  const scheduleThemeSample = useCallback(() => {
+    scheduleThemeSampleRef.current();
+  }, []);
+
+  return { theme, scheduleThemeSample };
 }
 
 /** Lead control next to Work: classic home glyph, or an arrow (up on Home for
@@ -215,16 +257,24 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   const reduceMotion = useReducedMotion();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const hash = useRouterState({ select: (s) => s.location.hash });
   const isHome = pathname === '/';
 
   const [breakpoint, setBreakpoint] = useState<Breakpoint>('sm');
   const [stuck, setStuck] = useState(false);
+  const [isRouteThemeTransitioning, setIsRouteThemeTransitioning] =
+    useState(false);
+  const [delayPillEntranceForMovement, setDelayPillEntranceForMovement] =
+    useState(false);
   const [navHover, setNavHover] = useState<NavHoverKey | null>(null);
   const [hoverPillRect, setHoverPillRect] = useState<NavHoverPillRect | null>(
     null,
   );
   const navClusterRef = useRef<HTMLDivElement | null>(null);
-  const navTheme = useNavTheme(navClusterRef, pathname);
+  const { theme: navTheme, scheduleThemeSample } = useNavTheme(
+    navClusterRef,
+    pathname,
+  );
   const navItemRefs = useRef<Record<NavHoverKey, HTMLAnchorElement | null>>({
     lead: null,
     work: null,
@@ -232,6 +282,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   });
   const navTop = useMotionValue<number>(NAV_BREAKPOINTS.sm.initialTop);
   const cancelScrollRef = useRef<(() => void) | null>(null);
+  const pillMovementDelayTimerRef = useRef<number | null>(null);
 
   const [jumpThreshold, setJumpThresholdState] = useState(NAV_JUMP_THRESHOLD_PX);
   const jumpThresholdRef = useRef(jumpThreshold);
@@ -250,8 +301,67 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     const update = () => setBreakpoint(getBreakpoint());
     update();
     window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    const coarseMq = window.matchMedia('(pointer: coarse)');
+    coarseMq.addEventListener('change', update);
+    return () => {
+      window.removeEventListener('resize', update);
+      coarseMq.removeEventListener('change', update);
+    };
   }, []);
+
+  const previousPathnameRef = useRef(pathname);
+  const previousNavThemeRef = useRef<NavTheme>(navTheme);
+  const pendingRouteThemeCheckRef = useRef(false);
+  const pendingRouteThemeClearRef = useRef<number | null>(null);
+  const routeThemeTransitionTimerRef = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    if (previousPathnameRef.current === pathname) return;
+    previousPathnameRef.current = pathname;
+    pendingRouteThemeCheckRef.current = true;
+    if (pendingRouteThemeClearRef.current !== null) {
+      window.clearTimeout(pendingRouteThemeClearRef.current);
+    }
+    pendingRouteThemeClearRef.current = window.setTimeout(() => {
+      pendingRouteThemeCheckRef.current = false;
+      pendingRouteThemeClearRef.current = null;
+    }, ROUTE_BG_CROSSFADE_S * 1000);
+
+    return () => {
+      if (pendingRouteThemeClearRef.current !== null) {
+        window.clearTimeout(pendingRouteThemeClearRef.current);
+        pendingRouteThemeClearRef.current = null;
+      }
+    };
+  }, [pathname]);
+
+  useLayoutEffect(() => {
+    if (previousNavThemeRef.current === navTheme) return;
+
+    const changedThemeDuringRouteChange = pendingRouteThemeCheckRef.current;
+    previousNavThemeRef.current = navTheme;
+    pendingRouteThemeCheckRef.current = false;
+    if (pendingRouteThemeClearRef.current !== null) {
+      window.clearTimeout(pendingRouteThemeClearRef.current);
+      pendingRouteThemeClearRef.current = null;
+    }
+
+    if (!changedThemeDuringRouteChange) return;
+
+    setIsRouteThemeTransitioning(true);
+    if (routeThemeTransitionTimerRef.current !== null) {
+      window.clearTimeout(routeThemeTransitionTimerRef.current);
+    }
+    routeThemeTransitionTimerRef.current = window.setTimeout(
+      () => setIsRouteThemeTransitioning(false),
+      ROUTE_BG_CROSSFADE_S * 1000,
+    );
+    return () => {
+      if (routeThemeTransitionTimerRef.current !== null) {
+        window.clearTimeout(routeThemeTransitionTimerRef.current);
+        routeThemeTransitionTimerRef.current = null;
+      }
+    };
+  }, [navTheme]);
 
   // Register the imperative API.
   useEffect(() => {
@@ -312,14 +422,21 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     let prevY = window.scrollY;
     let settleTimer: number | null = null;
     let inflight: { stop: () => void } | null = null;
+    let lastStuck = prevY >= stickPoint;
 
     // Sync immediately on mount and breakpoint change.
     navTop.set(computeNavTop(prevY));
-    setStuck(prevY >= stickPoint);
+    setStuck(lastStuck);
 
     const onScroll = () => {
       const y = window.scrollY;
-      setStuck(y >= stickPoint);
+      const nextStuck = y >= stickPoint;
+      if (nextStuck !== lastStuck) {
+        lastStuck = nextStuck;
+        setStuck(nextStuck);
+      }
+
+      scheduleThemeSample();
 
       const dy = y - prevY;
       prevY = y;
@@ -365,10 +482,16 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
       inflight?.stop();
       cancelScrollRef.current?.();
     };
-  }, [computeNavTop, navTop, reduceMotion, stickPoint]);
+  }, [computeNavTop, navTop, reduceMotion, scheduleThemeSample, stickPoint]);
 
-  const pillVisible = stuck;
-  const showHomeIcon = !isHome || stuck;
+  // `/#work` should force the stuck treatment once we have landed at the work
+  // section, but not after the user scrolls back to the top. Keeping this tied
+  // to `stuck` avoids mutating the URL mid-scroll just to clear the hash.
+  const isWorkDestination =
+    isHome && (hash === 'work' || hash === '#work') && stuck;
+  const destinationStuck = stuck || isWorkDestination;
+  const pillVisible = destinationStuck;
+  const showHomeIcon = !isHome || destinationStuck;
 
   const { workLayoutDelay, aboutLayoutDelay } = useMemo(() => {
     if (reduceMotion) {
@@ -415,6 +538,25 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     },
     [measureHoverPill],
   );
+
+  const delayPillUntilMovementSettles = useCallback(() => {
+    setDelayPillEntranceForMovement(true);
+    if (pillMovementDelayTimerRef.current !== null) {
+      window.clearTimeout(pillMovementDelayTimerRef.current);
+    }
+    pillMovementDelayTimerRef.current = window.setTimeout(() => {
+      setDelayPillEntranceForMovement(false);
+      pillMovementDelayTimerRef.current = null;
+    }, NAV_PILL_AFTER_MOVEMENT_DELAY_S * 1000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pillMovementDelayTimerRef.current !== null) {
+        window.clearTimeout(pillMovementDelayTimerRef.current);
+      }
+    };
+  }, []);
 
   useLayoutEffect(() => {
     if (navHover == null) return;
@@ -489,17 +631,26 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
         const top =
           target.getBoundingClientRect().top +
           window.scrollY -
-          NAV_HEIGHT_OFFSET;
+          getWorkScrollOffset();
         cancelScrollRef.current = smoothScrollTo(top);
         window.history.replaceState(null, '', '#work');
       } else {
         // SPA-navigate so SiteNav stays mounted and animates smoothly to its
         // home-state. The home page is responsible for jumping to #work on
         // mount when the hash is present.
-        navigate({ to: '/', hash: 'work' });
+        delayPillUntilMovementSettles();
+        // Avoid TanStack scroll restoration + handleHashScroll (scrollIntoView)
+        // racing Home's layout scrollTo. Safari often snaps filter/blur mid-spring
+        // when a second scroll runs after the grid reveal starts.
+        navigate({
+          to: '/',
+          hash: 'work',
+          resetScroll: false,
+          hashScrollIntoView: false,
+        });
       }
     },
-    [clearNavHover, isHome, navigate],
+    [clearNavHover, delayPillUntilMovementSettles, isHome, navigate],
   );
 
   const handleAboutClick = useCallback(
@@ -534,39 +685,60 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   const navTextClass = isDarkNav ? 'text-white/90' : 'text-black/80';
   const hoverPillClass = isDarkNav ? 'bg-white/15' : 'bg-white/70';
   const activeHoverTextClass = isDarkNav ? 'text-white' : 'text-black';
+  const pillEntranceDelay =
+    pillVisible && delayPillEntranceForMovement
+      ? NAV_PILL_AFTER_MOVEMENT_DELAY_S
+      : 0;
 
   return (
     <>
     <motion.nav
-      style={{ top: navTop }}
-      className={`fixed left-[calc(--spacing(6)-18px)] z-50 flex items-center text-xl font-medium uppercase leading-8 md:left-[calc(--spacing(14)-18px)] xl:left-[calc(--spacing(20)-18px)] 2xl:left-[calc((100vw-1536px)/2-18px)] ${navTextClass}`}
+      style={{ y: navTop }}
+      className={`fixed top-0 left-[calc(--spacing(10)-18px)] z-50 flex items-center text-xl font-medium uppercase leading-8 will-change-transform lg:left-[calc(--spacing(20)-18px)] 2xl:left-[calc(max(5rem,calc((100vw-1536px)/2))-18px)] ${navTextClass}`}
     >
       <div className="relative inline-flex min-h-12 items-center">
         <motion.div
           aria-hidden="true"
           data-theme={navTheme}
           className="liquid-glass-capsule pointer-events-none absolute inset-0 z-0"
+          style={
+            {
+              '--nav-pill-visual-blur': pillVisible ? '0px' : '50px',
+              '--nav-pill-visual-blur-duration': isRouteThemeTransitioning
+                ? '600ms'
+                : '300ms',
+              '--nav-pill-visual-blur-delay': `${pillEntranceDelay}s`,
+              transformOrigin: 'left center',
+            } as CSSProperties
+          }
           initial={false}
           animate={{
             opacity: pillVisible ? 1 : 0,
-            scale: pillVisible ? 1 : 0.92,
+            scale: pillVisible ? 1 : 0.88,
           }}
           transition={{
-            // Opacity must not ease in on show: animating opacity on a layer with
-            // backdrop-filter makes the frosted blur ramp up slowly (browser
-            // composites blur * opacity). Hide can still fade out.
+            // Keep show opacity quick: backdrop-filter is composited with opacity,
+            // so a long fade makes the frosted blur feel delayed.
             opacity: {
-              duration: pillVisible ? 0 : 0.22,
+              duration: pillVisible
+                ? isRouteThemeTransitioning
+                  ? 0.4
+                  : 0.08
+                : 0.22,
+              delay: pillEntranceDelay,
               ease: [0.2, 0, 0, 1],
             },
             scale: reduceMotion
               ? { duration: 0 }
               : {
-                  duration: pillVisible ? 0.36 : 0.28,
+                  duration: pillVisible ? 0.52 : 0.28,
+                  delay: pillEntranceDelay,
                   ease: [0.2, 0, 0, 1],
                 },
           }}
-        />
+        >
+          <div className="liquid-glass-capsule-surface" />
+        </motion.div>
         <motion.div
           ref={navClusterRef}
           layout

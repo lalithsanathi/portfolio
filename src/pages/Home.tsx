@@ -1,5 +1,12 @@
 import { Link } from '@tanstack/react-router';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   motion,
   useInView,
@@ -8,6 +15,7 @@ import {
 } from 'motion/react';
 import { markNavProgrammaticScroll } from '../components/SiteNav';
 import { useImagesLoaded } from '../hooks/useImagesLoaded';
+import { getWorkScrollOffset } from '../utils/workScroll';
 
 interface HomeProject {
   id: string;
@@ -19,6 +27,7 @@ interface HomeProject {
 
 /** Preload targets for the work grid so thumbnails start loading with the route, not after paint. */
 const HOME_PROJECT_IMAGE_URLS = [
+  '/images/projects/malted-srm/project-card-thumbnail.png',
   '/images/home-test/ve03.png',
   '/images/home-test/dashboard.png',
   '/images/home-test/phone-mockup.png',
@@ -27,6 +36,13 @@ const HOME_PROJECT_IMAGE_URLS = [
 
 const projects: HomeProject[] = [
   {
+    id: 'malted-srm',
+    title: 'Accelerating due diligence at Malted',
+    href: '/projects/malted-srm',
+    className: 'bg-stone-200',
+    imageSrc: '/images/projects/malted-srm/project-card-thumbnail.png',
+  },
+  {
     id: 'malted-pulse',
     title: 'Malted Pulse',
     href: '/projects/malted-pulse',
@@ -34,7 +50,7 @@ const projects: HomeProject[] = [
     imageSrc: '/images/home-test/ve03.png',
   },
   {
-    id: 'malted-srm',
+    id: 'national-grid-intro',
     title: 'Bringing balance at National Grid',
     href: '/projects/national-grid-intro',
     className: 'bg-stone-200',
@@ -55,18 +71,70 @@ const projects: HomeProject[] = [
     imageSrc: '/images/home-test/type-space.png',
   },
   {
-    id: 'coming-soon-1',
-    title: 'Coming soon',
-    className: 'bg-stone-200',
-  },
-  {
-    id: 'coming-soon-2',
+    id: 'coming-soon',
     title: 'Coming soon',
     className: 'bg-stone-200',
   },
 ] as const;
 
+/** Keep the card itself free of animated filters; WebKit can snap `filter` on image-containing layers. */
+const gridCardSpring = { type: 'spring' as const, duration: 0.6, bounce: 0 };
+
 const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: gridCardSpring,
+  },
+};
+
+const imageBlurOverlayVariants: Variants = {
+  hidden: { opacity: 1 },
+  visible: {
+    opacity: 0,
+    transition: {
+      duration: 0.55,
+      ease: [0.2, 0, 0, 1],
+    },
+  },
+};
+
+const staticVariants: Variants = { hidden: {}, visible: {} };
+
+function readStartsAtTop(): boolean | null {
+  if (typeof window === 'undefined') return null;
+  return !window.location.hash && window.scrollY < 100;
+}
+
+const HOME_HERO_FULL_ANIM_SESSION_KEY = 'portfolio-home-hero-full:v1';
+
+function readHomeHeroFullAnimDone(): boolean {
+  try {
+    return (
+      typeof window !== 'undefined' &&
+      sessionStorage.getItem(HOME_HERO_FULL_ANIM_SESSION_KEY) === '1'
+    );
+  } catch {
+    return false;
+  }
+}
+
+const HERO_HEADING =
+  "I'm Lalith, an award winning London based designer with 6+ years of experience designing and coding expressive, AI-native products.";
+
+const HERO_HEADING_WORDS = HERO_HEADING.split(/\s+/);
+const HERO_HEADING_STAGGER = 0.032;
+const HERO_HEADING_DELAY_CHILDREN = 0.2;
+const HERO_HEADING_STAGGER_SPAN =
+  Math.max(0, HERO_HEADING_WORDS.length - 1) * HERO_HEADING_STAGGER;
+/** ~80% through word stagger — LinkedIn, subtext, and grid wait until here. */
+const HERO_POST_HEADING_DELAY =
+  HERO_HEADING_DELAY_CHILDREN + 0.8 * HERO_HEADING_STAGGER_SPAN;
+const HERO_SUBTEXT_DELAY = HERO_POST_HEADING_DELAY + 0.15;
+const WORK_HASH_GRID_REVEAL_DELAY_MS = 180;
+
+const heroWordVariants: Variants = {
   hidden: { opacity: 0, filter: 'blur(12px)', y: 8 },
   visible: {
     opacity: 1,
@@ -76,81 +144,137 @@ const itemVariants: Variants = {
   },
 };
 
-const staticVariants: Variants = { hidden: {}, visible: {} };
+const heroHeadingContainerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: HERO_HEADING_STAGGER,
+      delayChildren: HERO_HEADING_DELAY_CHILDREN,
+    },
+  },
+};
+
+/** Parent drives stagger; cards are direct motion children so variant propagation works (Link cannot wrap the motion node). */
+function makeGridContainerVariants(
+  reduceMotion: boolean | null,
+  startsAtTop: boolean | null,
+  useDeferredHeroTiming: boolean,
+): Variants {
+  if (reduceMotion) return staticVariants;
+  const delayChildren = useDeferredHeroTiming
+    ? (HERO_POST_HEADING_DELAY + (startsAtTop ? 0.12 : 0.05)) as number
+    : ((startsAtTop ? 0.55 : 0.05) as number);
+  return {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren,
+      },
+    },
+  };
+}
 
 interface ProjectCardProps {
   project: HomeProject;
   index: number;
-  isInView: boolean;
-  startsAtTop: boolean | null;
   reduceMotion: boolean | null;
+  blurOverlayEnabled: boolean;
 }
 
 function ProjectCard({
   project,
   index,
-  isInView,
-  startsAtTop,
   reduceMotion,
+  blurOverlayEnabled,
 }: ProjectCardProps) {
-  const imageReady = useImagesLoaded(
-    project.imageSrc ? [project.imageSrc] : [],
-    Boolean(project.imageSrc),
-  );
-  const canReveal =
-    startsAtTop !== null && isInView && (!project.imageSrc || imageReady);
-  const animate = canReveal || reduceMotion ? 'visible' : 'hidden';
-  const transitionDelay = (startsAtTop ? 0.55 : 0.05) + index * 0.08;
-  const card = (
+  return (
     <motion.div
       variants={reduceMotion ? staticVariants : itemVariants}
-      initial="hidden"
-      animate={animate}
-      transition={
-        reduceMotion
-          ? undefined
-          : { type: 'spring', duration: 0.6, bounce: 0, delay: transitionDelay }
-      }
-      className={`group relative aspect-7/6 overflow-hidden rounded-2xl ${project.className}`}
+      className={`group relative aspect-7/6 overflow-hidden rounded-2xl will-change-transform ${project.className}`}
     >
       {project.imageSrc ? (
-        <img
-          src={project.imageSrc}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover object-center"
-          loading={index < 2 ? 'eager' : 'lazy'}
-          fetchPriority={index < 2 ? 'high' : 'auto'}
-          decoding="async"
-        />
+        <>
+          <img
+            src={project.imageSrc}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover object-center"
+            loading={index < 2 ? 'eager' : 'lazy'}
+            fetchPriority={index < 2 ? 'high' : 'auto'}
+            decoding="async"
+          />
+          {!reduceMotion && blurOverlayEnabled ? (
+            <motion.img
+              src={project.imageSrc}
+              alt=""
+              aria-hidden
+              variants={imageBlurOverlayVariants}
+              className="pointer-events-none absolute inset-0 h-full w-full scale-[1.04] object-cover object-center blur-md will-change-opacity"
+              loading="lazy"
+              fetchPriority="low"
+              decoding="async"
+            />
+          ) : null}
+        </>
       ) : null}
+      {project.href ? (
+        <Link
+          to={project.href}
+          className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
+          aria-label={project.title}
+        />
+      ) : (
+        <span className="sr-only">{project.title}</span>
+      )}
       <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/5 ring-inset" />
-      <span className="sr-only">{project.title}</span>
     </motion.div>
-  );
-
-  if (!project.href) {
-    return card;
-  }
-
-  return (
-    <Link
-      to={project.href}
-      className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
-      aria-label={project.title}
-    >
-      {card}
-    </Link>
   );
 }
 
 export default function Home() {
   const reduceMotion = useReducedMotion();
+  const heroFullAnimAlreadyPlayed = useMemo(() => readHomeHeroFullAnimDone(), []);
+  const playFullSessionHero = !reduceMotion && !heroFullAnimAlreadyPlayed;
   const projectGridRef = useRef<HTMLElement>(null);
+  /** Positive bottom rootMargin so below-the-fold grids still intersect on first paint (narrow viewports / iPad).
+   * Negative margins shrink the root and defer intersection until extra scroll — bad for landing UX.
+   * (`MarginType` only allows px | %, not vh.) */
   const projectsInView = useInView(projectGridRef, {
     once: true,
-    margin: '-10% 0px',
+    margin: '0px 0px 100% 0px',
   });
-  const [startsAtTop, setStartsAtTop] = useState<boolean | null>(null);
+  const [startsAtTop] = useState<boolean | null>(readStartsAtTop);
+  /** SPA / full load with `#work`: let the nav transition get first paint before the heavier image reveal. */
+  const [workGridMotionDeferred, setWorkGridMotionDeferred] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.location.hash === '#work',
+  );
+  const [blurOverlaysEnabled, setBlurOverlaysEnabled] = useState(
+    () =>
+      typeof window === 'undefined' ||
+      window.location.hash !== '#work',
+  );
+
+  const projectImageUrls = projects
+    .map((p) => p.imageSrc)
+    .filter((src): src is string => Boolean(src));
+  const projectImagesReady = useImagesLoaded(projectImageUrls);
+
+  const gridRevealReady =
+    startsAtTop !== null &&
+    projectsInView &&
+    projectImagesReady &&
+    !workGridMotionDeferred;
+  const gridContainerVariants = useMemo(
+    () =>
+      makeGridContainerVariants(
+        reduceMotion,
+        startsAtTop,
+        playFullSessionHero,
+      ),
+    [reduceMotion, startsAtTop, playFullSessionHero],
+  );
 
   const heroInitial = reduceMotion
     ? false
@@ -158,14 +282,6 @@ export default function Home() {
   const heroAnimate = reduceMotion
     ? undefined
     : { opacity: 1, filter: 'blur(0px)', y: 0 };
-
-  useLayoutEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      setStartsAtTop(!window.location.hash && window.scrollY < 100);
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, []);
 
   useLayoutEffect(() => {
     const links: HTMLLinkElement[] = [];
@@ -191,39 +307,99 @@ export default function Home() {
   // jump as programmatic so the nav springs to its new resting top instead
   // of being subject to the |dy| threshold.
   useLayoutEffect(() => {
-    if (window.location.hash !== '#work') return;
+    if (window.location.hash !== '#work') {
+      return;
+    }
     const target = document.getElementById('work');
-    if (!target) return;
+    if (!target) {
+      const releaseFrame = requestAnimationFrame(() => {
+        setBlurOverlaysEnabled(true);
+        setWorkGridMotionDeferred(false);
+      });
+      return () => cancelAnimationFrame(releaseFrame);
+    }
     const top =
-      target.getBoundingClientRect().top + window.scrollY - 80;
+      target.getBoundingClientRect().top +
+      window.scrollY -
+      getWorkScrollOffset();
     markNavProgrammaticScroll();
     window.scrollTo({ top, behavior: 'auto' });
+
+    let revealFrame: number | null = null;
+    const revealTimer = window.setTimeout(() => {
+      setBlurOverlaysEnabled(true);
+      revealFrame = requestAnimationFrame(() => {
+        setWorkGridMotionDeferred(false);
+      });
+    }, WORK_HASH_GRID_REVEAL_DELAY_MS);
+    return () => {
+      window.clearTimeout(revealTimer);
+      if (revealFrame !== null) cancelAnimationFrame(revealFrame);
+    };
   }, []);
 
   useEffect(() => {
+    let clearHashTimer: number | null = null;
+
+    const clearTimer = () => {
+      if (clearHashTimer === null) return;
+      window.clearTimeout(clearHashTimer);
+      clearHashTimer = null;
+    };
+
     const handleScroll = () => {
-      if (window.location.hash === '#work' && window.scrollY < 100) {
-        window.history.replaceState(null, '', window.location.pathname);
+      if (window.location.hash !== '#work' || window.scrollY >= 100) {
+        clearTimer();
+        return;
       }
+
+      clearTimer();
+      clearHashTimer = window.setTimeout(() => {
+        if (window.location.hash === '#work' && window.scrollY < 100) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }, 180);
     };
 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
+      clearTimer();
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
+  useEffect(() => {
+    if (!playFullSessionHero) return;
+    const markMs = Math.ceil(
+      (HERO_HEADING_DELAY_CHILDREN + HERO_HEADING_STAGGER_SPAN + 0.9) * 1000,
+    );
+    const id = window.setTimeout(() => {
+      try {
+        sessionStorage.setItem(HOME_HERO_FULL_ANIM_SESSION_KEY, '1');
+      } catch {
+        /* private mode / quota */
+      }
+    }, markMs);
+    return () => clearTimeout(id);
+  }, [playFullSessionHero]);
+
   return (
-    <main className="relative min-h-screen px-6 pb-48 pt-48 md:px-14 md:pt-60 xl:px-20 xl:pt-72 2xl:px-0">
+    <main className="relative min-h-screen px-10 pb-48 pt-44 lg:px-20 md:pt-36 xl:pt-44 2xl:pt-72 [@media(min-width:1280px)_and_(pointer:coarse)]:pt-52! 2xl:px-page-edge-2xl">
       <motion.a
         href="https://www.linkedin.com/in/laliths/"
         aria-label="LinkedIn"
-        className="absolute right-6 top-16 z-60 -mx-4 flex min-h-12 items-center rounded-full px-4 text-black/80 transition-[color,transform] duration-300 ease-out hover:text-black active:scale-[0.96] md:right-14 md:top-24 xl:right-20 xl:top-30 2xl:right-[calc((100vw-1536px)/2)]"
+        className="absolute right-10 top-16 z-60 -mx-4 flex min-h-12 items-center rounded-full px-4 text-black/80 transition-[color,transform] duration-300 ease-out hover:text-black active:scale-[0.96] md:top-12 lg:right-20 xl:top-16 2xl:top-30 [@media(min-width:1280px)_and_(pointer:coarse)]:top-16! 2xl:right-[max(5rem,calc((100vw-1536px)/2))]"
         initial={heroInitial}
         animate={heroAnimate}
-        transition={{ type: 'spring', duration: 0.7, bounce: 0 }}
+        transition={{
+          type: 'spring',
+          duration: 0.7,
+          bounce: 0,
+          delay:
+            reduceMotion ? 0 : playFullSessionHero ? HERO_POST_HEADING_DELAY : 0,
+        }}
       >
         <span className="-mx-3 flex size-12 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-white/70">
           <svg
@@ -237,20 +413,52 @@ export default function Home() {
       </motion.a>
 
       <section className="mx-auto grid w-full max-w-screen-2xl grid-cols-12">
-        <motion.h1
-          className="col-span-12 font-display text-[64px] leading-[80px] md:col-span-11 lg:col-span-10"
-          initial={heroInitial}
-          animate={heroAnimate}
-          transition={{ type: 'spring', duration: 0.7, bounce: 0, delay: 0.2 }}
-        >
-          Award winning London based designer with over 6 years of experience
-          building expressive, AI-native products.
-        </motion.h1>
+        {reduceMotion ? (
+          <h1 className="col-span-12 font-display text-[48px] leading-[64px]">
+            {HERO_HEADING}
+          </h1>
+        ) : playFullSessionHero ? (
+          <motion.h1
+            className="col-span-12 font-display text-[48px] leading-[64px]"
+            variants={heroHeadingContainerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {HERO_HEADING_WORDS.map((word, i) => (
+              <Fragment key={`${i}-${word}`}>
+                <motion.span variants={heroWordVariants} className="inline">
+                  {word}
+                </motion.span>
+                {i < HERO_HEADING_WORDS.length - 1 ? ' ' : null}
+              </Fragment>
+            ))}
+          </motion.h1>
+        ) : (
+          <motion.h1
+            className="col-span-12 font-display text-[48px] leading-[64px]"
+            initial={heroInitial}
+            animate={heroAnimate}
+            transition={{
+              type: 'spring',
+              duration: 0.7,
+              bounce: 0,
+              delay: 0.2,
+            }}
+          >
+            {HERO_HEADING}
+          </motion.h1>
+        )}
         <motion.p
-          className="col-span-12 mt-10 text-[28px] font-regular leading-10 text-gray-warm-500 text-pretty md:col-span-10 lg:col-span-8"
+          className="col-span-12 mt-8 text-[28px] font-regular leading-10 text-gray-warm-700 text-pretty xl:col-span-10 md:mt-9 xl:mt-10 2xl:col-span-8"
           initial={heroInitial}
           animate={heroAnimate}
-          transition={{ type: 'spring', duration: 0.7, bounce: 0, delay: 0.4 }}
+          transition={{
+            type: 'spring',
+            duration: 0.7,
+            bounce: 0,
+            delay:
+              reduceMotion ? 0 : playFullSessionHero ? HERO_SUBTEXT_DELAY : 0.4,
+          }}
         >
           I mix systems and analogies, and design by building. I’ve made Figma
           plugins used by hundreds of people, given talks about the future of
@@ -261,17 +469,19 @@ export default function Home() {
       <motion.section
         ref={projectGridRef}
         id="work"
-        className="mx-auto mt-56 grid w-full max-w-screen-2xl scroll-mt-20 grid-cols-1 gap-4 md:scroll-mt-24 md:grid-cols-2"
+        className="mx-auto mt-32 grid w-full max-w-screen-2xl scroll-mt-20 grid-cols-1 gap-4 md:mt-24 xl:mt-24 2xl:mt-64 md:scroll-mt-24 md:grid-cols-2"
         style={{ visibility: startsAtTop === null ? 'hidden' : undefined }}
+        variants={gridContainerVariants}
+        initial="hidden"
+        animate={gridRevealReady ? 'visible' : 'hidden'}
       >
         {projects.map((project, index) => (
           <ProjectCard
             key={project.id}
             project={project}
             index={index}
-            isInView={projectsInView}
-            startsAtTop={startsAtTop}
             reduceMotion={reduceMotion}
+            blurOverlayEnabled={blurOverlaysEnabled}
           />
         ))}
       </motion.section>
@@ -280,7 +490,7 @@ export default function Home() {
       {/* <section
         data-nav-theme="dark"
         aria-label="Dark section (nav theme test)"
-        className="mx-auto mt-32 flex min-h-[85vh] w-full max-w-screen-2xl flex-col justify-center rounded-2xl bg-black px-6 py-24 text-[#e5e1c3] md:mt-40 md:px-14 md:py-32 xl:px-20"
+        className="mx-auto mt-32 flex min-h-[85vh] w-full max-w-screen-2xl flex-col justify-center rounded-2xl bg-black px-10 py-24 text-[#e5e1c3] md:mt-40 lg:px-20 md:py-32"
       >
         <p className="max-w-2xl text-pretty text-2xl font-medium leading-snug md:text-3xl md:leading-tight">
           Same-route nav theme test: keep scrolling — the bar should switch to

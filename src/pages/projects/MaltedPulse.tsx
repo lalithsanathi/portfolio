@@ -21,10 +21,10 @@ export default function MaltedPulse() {
 
   return (
     <main className="pb-40">
-      <section className="bg-gray-warm-200 px-6 pb-12 pt-48 md:px-14 md:pb-16 md:pt-60 xl:px-20 xl:pt-72 2xl:px-0">
+      <section className="bg-gray-warm-200 px-10 pb-16 pt-44 lg:px-20 md:pt-36 xl:pt-44 2xl:pt-72 [@media(min-width:1280px)_and_(pointer:coarse)]:pt-52! 2xl:px-page-edge-2xl">
         <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-12">
           <motion.h1
-            className="col-span-12 mb-16 font-display text-[64px] leading-[80px]"
+            className="col-span-12 mb-16 font-display text-[48px] leading-[64px]"
             initial={heroInitial}
             animate={heroAnimate}
             transition={{ ...spring, delay: 0.2 }}
