@@ -62,6 +62,16 @@ export function markNavProgrammaticScroll() {
   programmaticListeners.forEach((fn) => fn());
 }
 
+const routeIntentListeners = new Set<(pathname: string) => void>();
+
+export function markNavRouteIntent(to: string) {
+  const pathname =
+    typeof window === 'undefined'
+      ? to
+      : new URL(to, window.location.origin).pathname;
+  routeIntentListeners.forEach((fn) => fn(pathname));
+}
+
 const navThemeOverrideListeners = new Set<(theme: NavTheme | null) => void>();
 let navThemeOverride: NavTheme | null = null;
 
@@ -283,6 +293,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   const navTop = useMotionValue<number>(NAV_BREAKPOINTS.sm.initialTop);
   const cancelScrollRef = useRef<(() => void) | null>(null);
   const pillMovementDelayTimerRef = useRef<number | null>(null);
+  const routeIntentAnimationRef = useRef<{ stop: () => void } | null>(null);
 
   const [jumpThreshold, setJumpThresholdState] = useState(NAV_JUMP_THRESHOLD_PX);
   const jumpThresholdRef = useRef(jumpThreshold);
@@ -407,6 +418,44 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     [initialTop, stuckTop, stickPoint],
   );
 
+  const settleNavAtRouteTop = useCallback(() => {
+    const target = computeNavTop(0);
+
+    programmaticUntilRef.current =
+      performance.now() + NAV_PROGRAMMATIC_WINDOW_MS;
+    setProgrammaticTick((n) => n + 1);
+    setStuck(false);
+
+    routeIntentAnimationRef.current?.stop();
+    routeIntentAnimationRef.current = null;
+
+    if (reduceMotion) {
+      navTop.set(target);
+      return;
+    }
+
+    routeIntentAnimationRef.current = animate(navTop, target, navSpring);
+  }, [computeNavTop, navTop, reduceMotion]);
+
+  useEffect(() => {
+    const onRouteIntent = (nextPathname: string) => {
+      if (nextPathname === '/') return;
+      settleNavAtRouteTop();
+    };
+
+    routeIntentListeners.add(onRouteIntent);
+    return () => {
+      routeIntentListeners.delete(onRouteIntent);
+    };
+  }, [settleNavAtRouteTop]);
+
+  const previousRouteIntentPathnameRef = useRef(pathname);
+  useLayoutEffect(() => {
+    if (previousRouteIntentPathnameRef.current === pathname) return;
+    previousRouteIntentPathnameRef.current = pathname;
+    if (!isHome) settleNavAtRouteTop();
+  }, [isHome, pathname, settleNavAtRouteTop]);
+
   // Drive navTop from window.scrollY. For natural scrolling we update navTop
   // synchronously so it stays glued to the scroll position. When the scroll
   // position jumps discontinuously — e.g. TanStack's scroll-restoration on
@@ -457,6 +506,8 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
         // scroll-restoration immediately followed by `scrollTo(#work)`)
         // collapses into a single animation to the final position.
         if (settleTimer !== null) window.clearTimeout(settleTimer);
+        routeIntentAnimationRef.current?.stop();
+        routeIntentAnimationRef.current = null;
         inflight?.stop();
 
         settleTimer = window.setTimeout(() => {
@@ -467,6 +518,8 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
       } else if (settleTimer === null) {
         // Normal scroll: track instantly. Cancel any in-flight spring so
         // user input always wins over a pending route-transition animation.
+        routeIntentAnimationRef.current?.stop();
+        routeIntentAnimationRef.current = null;
         inflight?.stop();
         inflight = null;
         navTop.set(computeNavTop(y));
@@ -479,6 +532,8 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (settleTimer !== null) window.clearTimeout(settleTimer);
+      routeIntentAnimationRef.current?.stop();
+      routeIntentAnimationRef.current = null;
       inflight?.stop();
       cancelScrollRef.current?.();
     };
