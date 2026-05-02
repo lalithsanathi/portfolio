@@ -222,6 +222,7 @@ function ProjectCard({
       {project.href ? (
         <Link
           to={project.href}
+          preload="viewport"
           className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
           aria-label={project.title}
         />

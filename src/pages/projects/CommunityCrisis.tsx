@@ -78,6 +78,8 @@ export default function CommunityCrisis() {
               src={`${IMG}/hero2.png`}
               alt="Herd app interface showing the flare system"
               className="absolute inset-0 size-full object-cover"
+              fetchPriority="high"
+              decoding="async"
             />
           </div>
         </Container>
@@ -98,6 +100,8 @@ export default function CommunityCrisis() {
             src={`${IMG}/context.png`}
             alt="Sending a flare for help through the Herd app"
             className="col-span-12 w-full rounded-2xl"
+            loading="lazy"
+            decoding="async"
           />
         </div>
       </Container>
@@ -285,6 +289,8 @@ export default function CommunityCrisis() {
               src={`${IMG}/Hero_Herd_2.png`}
               alt="Early flare design — visually cluttered with too much text"
               className="w-full rounded-2xl"
+              loading="lazy"
+              decoding="async"
             />
             <p className="text-lg text-stone-500">
               Early iterations felt old and visually cluttering when stacked.
@@ -296,6 +302,8 @@ export default function CommunityCrisis() {
               src={`${IMG}/Hero_herd_3.png`}
               alt="Simplified flare design with colour categories"
               className="w-full rounded-2xl"
+              loading="lazy"
+              decoding="async"
             />
             <p className="text-lg text-stone-500">
               Simplified the visual design and attempted to communicate category
@@ -312,6 +320,8 @@ export default function CommunityCrisis() {
               src={`${IMG}/Hero_Herd_5.png`}
               alt="Further simplified flare with lighter font and time sent"
               className="w-full rounded-2xl"
+              loading="lazy"
+              decoding="async"
             />
             <p className="text-lg text-stone-500">
               Further simplifying. Explored lighter font thickness, introduced
@@ -323,6 +333,8 @@ export default function CommunityCrisis() {
               src={`${IMG}/Hero_Herd_7.png`}
               alt="Final minimal flare design balanced for list view"
               className="w-full rounded-2xl"
+              loading="lazy"
+              decoding="async"
             />
             <p className="text-lg text-stone-500">
               Removed colour as a communicator — it was hard for users to
@@ -364,6 +376,8 @@ export default function CommunityCrisis() {
               src={`${IMG}/User_Journey_1.svg`}
               alt="User flow: predicted risk guides user actions"
               className="col-span-12 mt-8 w-full lg:col-span-8 lg:mt-0"
+              loading="lazy"
+              decoding="async"
             />
           </div>
 
@@ -383,6 +397,8 @@ export default function CommunityCrisis() {
               src={`${IMG}/User_Journey_2.svg`}
               alt="User flow: sending a flare for community help"
               className="col-span-12 mt-8 w-full lg:col-span-8 lg:mt-0"
+              loading="lazy"
+              decoding="async"
             />
           </div>
 
@@ -401,6 +417,8 @@ export default function CommunityCrisis() {
               src={`${IMG}/User_Journey_3.svg`}
               alt="User flow: volunteering help through the platform"
               className="col-span-12 mt-8 w-full lg:col-span-8 lg:mt-0"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
