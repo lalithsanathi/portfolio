@@ -31,7 +31,6 @@ const navSpring = {
 /** Interval between each nav item’s layout shift (lead → Work → About). */
 const NAV_CLUSTER_LAYOUT_STAGGER_S = 0.029;
 const NAV_PILL_AFTER_MOVEMENT_DELAY_S = 0.26;
-const NAV_ROUTE_TOP_DELAY_MS = 90;
 
 /** Default jump threshold (px). The tuner overlay can override this at runtime
  *  without remounting the scroll listener (see `jumpThresholdRef`). */
@@ -259,8 +258,12 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   const showNavTuner = false;
   const reduceMotion = useReducedMotion();
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const hash = useRouterState({ select: (s) => s.location.hash });
+  const pathname = useRouterState({
+    select: (s) => s.resolvedLocation?.pathname ?? s.location.pathname,
+  });
+  const hash = useRouterState({
+    select: (s) => s.resolvedLocation?.hash ?? s.location.hash,
+  });
   const isHome = pathname === '/';
 
   const [breakpoint, setBreakpoint] = useState<Breakpoint>('sm');
@@ -286,8 +289,6 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   const navTop = useMotionValue<number>(NAV_BREAKPOINTS.sm.initialTop);
   const cancelScrollRef = useRef<(() => void) | null>(null);
   const pillMovementDelayTimerRef = useRef<number | null>(null);
-  const routeTopAnimationRef = useRef<{ stop: () => void } | null>(null);
-  const routeTopDelayTimerRef = useRef<number | null>(null);
   const shouldPlayNavEntryRef = useRef(!hasPlayedNavEntry);
 
   const [jumpThreshold, setJumpThresholdState] = useState(NAV_JUMP_THRESHOLD_PX);
@@ -413,48 +414,6 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     [initialTop, stuckTop, stickPoint],
   );
 
-  const settleNavAtRouteTop = useCallback(() => {
-    const target = computeNavTop(0);
-
-    if (routeTopDelayTimerRef.current !== null) {
-      window.clearTimeout(routeTopDelayTimerRef.current);
-      routeTopDelayTimerRef.current = null;
-    }
-    programmaticUntilRef.current =
-      performance.now() + NAV_PROGRAMMATIC_WINDOW_MS;
-    setProgrammaticTick((n) => n + 1);
-    setStuck(false);
-
-    routeTopAnimationRef.current?.stop();
-    routeTopAnimationRef.current = null;
-
-    if (reduceMotion) {
-      navTop.set(target);
-      return;
-    }
-
-    routeTopAnimationRef.current = animate(navTop, target, navSpring);
-  }, [computeNavTop, navTop, reduceMotion]);
-
-  const previousRouteIntentPathnameRef = useRef(pathname);
-  useLayoutEffect(() => {
-    if (previousRouteIntentPathnameRef.current === pathname) return;
-    previousRouteIntentPathnameRef.current = pathname;
-    if (isHome) return;
-
-    routeTopDelayTimerRef.current = window.setTimeout(
-      settleNavAtRouteTop,
-      NAV_ROUTE_TOP_DELAY_MS,
-    );
-
-    return () => {
-      if (routeTopDelayTimerRef.current !== null) {
-        window.clearTimeout(routeTopDelayTimerRef.current);
-        routeTopDelayTimerRef.current = null;
-      }
-    };
-  }, [isHome, pathname, settleNavAtRouteTop]);
-
   // Drive navTop from window.scrollY. For natural scrolling we update navTop
   // synchronously so it stays glued to the scroll position. When the scroll
   // position jumps discontinuously — e.g. TanStack's scroll-restoration on
@@ -505,8 +464,6 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
         // scroll-restoration immediately followed by `scrollTo(#work)`)
         // collapses into a single animation to the final position.
         if (settleTimer !== null) window.clearTimeout(settleTimer);
-        routeTopAnimationRef.current?.stop();
-        routeTopAnimationRef.current = null;
         inflight?.stop();
 
         settleTimer = window.setTimeout(() => {
@@ -517,8 +474,6 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
       } else if (settleTimer === null) {
         // Normal scroll: track instantly. Cancel any in-flight spring so
         // user input always wins over a pending route-transition animation.
-        routeTopAnimationRef.current?.stop();
-        routeTopAnimationRef.current = null;
         inflight?.stop();
         inflight = null;
         navTop.set(computeNavTop(y));
@@ -531,8 +486,6 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (settleTimer !== null) window.clearTimeout(settleTimer);
-      routeTopAnimationRef.current?.stop();
-      routeTopAnimationRef.current = null;
       inflight?.stop();
       cancelScrollRef.current?.();
     };
