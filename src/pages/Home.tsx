@@ -23,6 +23,8 @@ interface HomeProject {
   className: string;
   href?: string;
   imageSrc?: string;
+  /** Samples under the fixed nav use this for light/dark link treatment. */
+  navTheme?: 'light' | 'dark';
 }
 
 /** Preload targets for the work grid so thumbnails start loading with the route, not after paint. */
@@ -55,6 +57,7 @@ const projects: HomeProject[] = [
     href: '/projects/national-grid-intro',
     className: 'bg-stone-200',
     imageSrc: '/images/home-test/dashboard.png',
+    navTheme: 'dark',
   },
   {
     id: 'community-crisis',
@@ -69,6 +72,7 @@ const projects: HomeProject[] = [
     href: '/projects/embedding-models',
     className: 'bg-stone-200',
     imageSrc: '/images/home-test/type-space.png',
+    navTheme: 'dark',
   },
   {
     id: 'coming-soon',
@@ -194,6 +198,9 @@ function ProjectCard({
     <motion.div
       variants={reduceMotion ? staticVariants : itemVariants}
       className={`group relative aspect-7/6 overflow-hidden rounded-2xl will-change-transform ${project.className}`}
+      {...(project.navTheme
+        ? { 'data-nav-theme': project.navTheme }
+        : undefined)}
     >
       {project.imageSrc ? (
         <>
