@@ -66,10 +66,16 @@
 
   .liquid-glass-capsule::before {
     background: rgba(255, 255, 255, 0.001);
-    backdrop-filter: blur(20px) saturate(1.8);
-    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    /* --nav-pill-backdrop-blur: show/hide easing without a `filter` sibling on top of this stack. */
+    -webkit-backdrop-filter: blur(var(--nav-pill-backdrop-blur, 20px)) saturate(1.8);
+    backdrop-filter: blur(var(--nav-pill-backdrop-blur, 20px)) saturate(1.8);
     transform: translateZ(0);
-    transition: background 260ms cubic-bezier(0.2, 0, 0, 1);
+    transition:
+      background 260ms cubic-bezier(0.2, 0, 0, 1),
+      -webkit-backdrop-filter var(--nav-pill-backdrop-blur-duration, 300ms) cubic-bezier(0.2, 0, 0, 1)
+        var(--nav-pill-backdrop-blur-delay, 0ms),
+      backdrop-filter var(--nav-pill-backdrop-blur-duration, 300ms) cubic-bezier(0.2, 0, 0, 1)
+        var(--nav-pill-backdrop-blur-delay, 0ms);
   }
 
   .liquid-glass-capsule-surface {
@@ -82,12 +88,10 @@
       inset 0 0 0 1px rgba(255, 255, 255, 0.5),
       inset 1px 1px 0 rgba(255, 255, 255, 0.55),
       inset -10px -10px 22px rgba(29, 28, 26, 0.04);
-    filter: blur(var(--nav-pill-visual-blur, 0px));
     opacity: 0.95;
     transition:
       background 260ms cubic-bezier(0.2, 0, 0, 1),
-      box-shadow 260ms cubic-bezier(0.2, 0, 0, 1),
-      filter var(--nav-pill-visual-blur-duration, 300ms) cubic-bezier(0.2, 0, 0, 1) var(--nav-pill-visual-blur-delay, 0ms);
+      box-shadow 260ms cubic-bezier(0.2, 0, 0, 1);
   }
 
   .liquid-glass-capsule[data-theme="dark"] {

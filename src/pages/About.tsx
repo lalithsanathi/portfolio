@@ -45,7 +45,7 @@ export default function About() {
     >
       <section className="relative mx-auto flex min-h-[830px] w-full max-w-screen-2xl flex-col items-center pt-44 md:min-h-[1180px] md:pt-44 xl:min-h-[1360px] xl:pt-[272px]">
         <motion.h1
-          className="relative z-0 text-balance bg-[linear-gradient(167deg,rgba(0,0,0,0)_24%,rgba(0,0,0,0.5)_74%),linear-gradient(90deg,#cdcab0,#cdcab0)] bg-clip-text text-center font-display text-[58px] leading-none text-transparent md:text-[104px] xl:text-[120px]"
+          className="relative z-0 text-balance bg-[linear-gradient(167deg,rgba(0,0,0,0)_24%,rgba(0,0,0,0.5)_74%),linear-gradient(90deg,#cdcab0,#cdcab0)] bg-clip-text py-[0.06em] text-center font-display text-[58px] leading-[1.06] text-transparent md:text-[104px] md:leading-[1.05] xl:text-[120px] xl:leading-[1.05]"
           initial={heroInitial}
           animate={heroAnimate}
           transition={{ ...spring, delay: late(TIMING.name) }}
@@ -67,7 +67,7 @@ export default function About() {
         </motion.div>
       </section>
 
-      <motion.section
+      {/* <motion.section
         className="mx-auto grid w-full max-w-screen-2xl grid-cols-12 gap-x-8"
         initial={heroInitial}
         animate={heroAnimate}
@@ -90,11 +90,11 @@ export default function About() {
           </div>
           <div className="col-span-6 h-[220px] rounded-2xl bg-[#1c1c1c] opacity-80 md:col-span-2 md:h-[336px]" />
         </div>
-      </motion.section>
+      </motion.section> */}
 
       <section className="mx-auto mt-28 grid w-full max-w-screen-2xl grid-cols-12 gap-x-8 gap-y-16 md:mt-40 xl:mt-56">
         <motion.h2
-          className="col-span-12 bg-[linear-gradient(172deg,rgba(0,0,0,0)_24%,rgba(0,0,0,0.2)_74%),linear-gradient(90deg,#e5e1c3,#e5e1c3)] bg-clip-text text-[28px] leading-9 tracking-[-0.01em] text-transparent md:col-span-4 md:text-[32px] md:leading-10 xl:col-span-3"
+          className="col-span-12 bg-[linear-gradient(172deg,rgba(0,0,0,0)_24%,rgba(0,0,0,0.2)_74%),linear-gradient(90deg,#e5e1c3,#e5e1c3)] bg-clip-text py-[0.08em] text-[28px] leading-[1.35] tracking-[-0.01em] text-transparent md:col-span-4 md:text-[32px] md:leading-[1.33] xl:col-span-3 xl:col-start-2"
           initial={heroInitial}
           animate={heroAnimate}
           transition={{ ...spring, delay: late(TIMING.principlesStart) }}
@@ -102,7 +102,7 @@ export default function About() {
           The way I design
         </motion.h2>
 
-        <div className="col-span-12 flex flex-col gap-28 md:col-span-8 md:col-start-6 xl:col-span-6 xl:gap-[200px]">
+        <div className="col-span-12 flex flex-col gap-28 md:col-span-8 md:col-start-6 xl:col-start-6 xl:col-span-6 xl:gap-[200px]">
           {designPrinciples.map((principle, i) => (
             <motion.article
               key={principle.title}
@@ -116,7 +116,7 @@ export default function About() {
               }}
               className="flex flex-col gap-8"
             >
-              <h3 className="bg-[linear-gradient(173deg,rgba(0,0,0,0)_24%,rgba(0,0,0,0.3)_74%),linear-gradient(90deg,#e5e1c3,#e5e1c3)] bg-clip-text text-[48px] font-extralight leading-[1.1] text-transparent md:text-[64px] md:leading-[72px]">
+              <h3 className="bg-[linear-gradient(173deg,rgba(0,0,0,0)_24%,rgba(0,0,0,0.3)_74%),linear-gradient(90deg,#e5e1c3,#e5e1c3)] bg-clip-text py-[0.08em] text-[48px] font-extralight leading-[1.2] text-transparent md:text-[64px] md:leading-[1.18]">
                 {principle.title}
               </h3>
               <p className="text-xl font-medium leading-7 text-[#e5e1c3]/50">

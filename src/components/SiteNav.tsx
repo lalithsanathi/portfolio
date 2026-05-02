@@ -700,15 +700,14 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
         <motion.div
           aria-hidden="true"
           data-theme={navTheme}
-          className="liquid-glass-capsule pointer-events-none absolute inset-0 z-0"
+          className="liquid-glass-capsule pointer-events-none absolute inset-0 z-0 origin-left"
           style={
             {
-              '--nav-pill-visual-blur': pillVisible ? '0px' : '50px',
-              '--nav-pill-visual-blur-duration': isRouteThemeTransitioning
+              '--nav-pill-backdrop-blur': pillVisible ? '20px' : '68px',
+              '--nav-pill-backdrop-blur-duration': isRouteThemeTransitioning
                 ? '600ms'
                 : '300ms',
-              '--nav-pill-visual-blur-delay': `${pillEntranceDelay}s`,
-              transformOrigin: 'left center',
+              '--nav-pill-backdrop-blur-delay': `${pillEntranceDelay}s`,
             } as CSSProperties
           }
           initial={false}
