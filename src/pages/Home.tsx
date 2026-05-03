@@ -125,7 +125,7 @@ function readHomeHeroFullAnimDone(): boolean {
 }
 
 const HERO_HEADING =
-  "I'm Lalith, an award winning London based designer with 6+ years of experience designing and coding expressive, AI-native products.";
+  "I'm Lalith, a UX designer  building expressive, AI-native products.";
 
 const HERO_HEADING_WORDS = HERO_HEADING.split(/\s+/);
 const HERO_HEADING_STAGGER = 0.032;
@@ -424,12 +424,12 @@ export default function Home() {
 
       <section className="mx-auto grid w-full max-w-screen-2xl grid-cols-12">
         {reduceMotion ? (
-          <h1 className="col-span-12 font-display text-[48px] leading-[64px]">
+          <h1 className="col-span-12 max-w-3xl text-pretty font-display text-[56px] leading-[72px] sm:max-w-4xl">
             {HERO_HEADING}
           </h1>
         ) : playFullSessionHero ? (
           <motion.h1
-            className="col-span-12 font-display text-[48px] leading-[64px]"
+            className="col-span-12 max-w-3xl text-pretty font-display text-[56px] leading-[72px] sm:max-w-4xl"
             variants={heroHeadingContainerVariants}
             initial="hidden"
             animate="visible"
@@ -445,7 +445,7 @@ export default function Home() {
           </motion.h1>
         ) : (
           <motion.h1
-            className="col-span-12 font-display text-[48px] leading-[64px]"
+            className="col-span-12 max-w-3xl text-pretty font-display text-[56px] leading-[72px] sm:max-w-4xl"
             initial={heroInitial}
             animate={heroAnimate}
             transition={{
@@ -470,7 +470,7 @@ export default function Home() {
               reduceMotion ? 0 : playFullSessionHero ? HERO_SUBTEXT_DELAY : 0.4,
           }}
         >
-          I mix systems and analogies, and design by building. I’ve made Figma
+          I’ve made Figma
           plugins used by hundreds of people, given talks about the future of
           interaction design, and enjoy mentoring other designers.
         </motion.p>
