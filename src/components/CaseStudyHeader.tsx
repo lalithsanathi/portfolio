@@ -22,7 +22,7 @@ export default function CaseStudyHeader({
   children,
 }: CaseStudyHeaderProps) {
   return (
-    <Container className="pt-8 mt-22">
+    <Container className="pt-8 mt-36 md:mt-44 xl:mt-52">
       <Link
         to="/"
         className="inline-flex items-center gap-4 text-2xl uppercase text-stone-500 hover:text-stone-900"
@@ -32,7 +32,9 @@ export default function CaseStudyHeader({
       </Link>
 
       <div className="mt-12 grid grid-cols-12 gap-x-8">
-        <h1 className="col-span-12 font-display text-5xl mb-16">{title}</h1>
+        <h1 className="col-span-12 mb-16 font-display text-[48px] leading-[64px]">
+          {title}
+        </h1>
 
         <div className="col-span-12 flex flex-col gap-7 lg:col-span-3">
           {meta.map((item) => (

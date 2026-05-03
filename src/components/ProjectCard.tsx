@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { clsx } from 'clsx';
 
-type CardSize = 'short' | 'tall';
+type CardSize = 'short' | 'tall' | 'extraTall';
 
 interface ProjectCardProps {
   title: string;
@@ -15,6 +15,7 @@ interface ProjectCardProps {
 const sizeClasses: Record<CardSize, string> = {
   short: 'aspect-4/3',
   tall: 'aspect-8/9',
+  extraTall: 'aspect-2/3',
 };
 
 const sharedClasses = [

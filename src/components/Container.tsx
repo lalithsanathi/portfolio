@@ -4,8 +4,9 @@ import { clsx } from "clsx";
 type ContainerVariant = "default" | "full";
 
 const variantClasses: Record<ContainerVariant, string> = {
-  default: "mx-auto max-w-[1440px] px-6 md:px-10 lg:px-40",
-  full: "mx-auto max-w-[1440px] px-4",
+  default:
+    "mx-auto w-full max-w-screen-2xl px-10 lg:px-20 2xl:px-page-edge-2xl",
+  full: "mx-auto w-full max-w-screen-2xl px-0",
 };
 
 interface ContainerProps {

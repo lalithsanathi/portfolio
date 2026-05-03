@@ -31,7 +31,8 @@ process.stdout.write(
   `${c.dim('  target → ')}${c.cyan(URL)}\n\n`
 )
 
-const child = spawn(viteBin, ['--host', ...process.argv.slice(2)], {
+// Use the current Node binary so `.bin/vite` runs as a script, not via shebang exec.
+const child = spawn(process.execPath, [viteBin, '--host', ...process.argv.slice(2)], {
   stdio: ['inherit', 'inherit', 'inherit'],
   env: process.env,
 })
