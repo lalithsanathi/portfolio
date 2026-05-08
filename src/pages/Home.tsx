@@ -19,6 +19,7 @@ import {
 } from '../navControls';
 import { useImagesLoaded } from '../hooks/useImagesLoaded';
 import { getWorkScrollOffset } from '../utils/workScroll';
+import { useProjectTransition } from '../projectTransition';
 
 interface HomeProject {
   id: string;
@@ -216,8 +217,12 @@ function ProjectCard({
   reduceMotion,
   blurOverlayEnabled,
 }: ProjectCardProps) {
+  const { capture } = useProjectTransition();
+  const cardRef = useRef<HTMLDivElement>(null);
+
   return (
     <motion.div
+      ref={cardRef}
       variants={reduceMotion ? staticVariants : itemVariants}
       className={`group relative aspect-7/6 overflow-hidden rounded-2xl shadow-[0_1px_0_rgba(255,255,255,0.35)_inset] transition-shadow duration-500 ease-[cubic-bezier(0.2,0,0,1)] hover:shadow-[0_22px_70px_rgba(29,28,26,0.12)] focus-within:shadow-[0_22px_70px_rgba(29,28,26,0.12)] ${project.className}`}
       {...(project.navTheme
@@ -284,7 +289,15 @@ function ProjectCard({
         <Link
           to={project.href}
           preload="viewport"
-          onClick={prepareProjectNavigation}
+          onClick={() => {
+            if (cardRef.current) {
+              capture({
+                projectId: project.id,
+                rect: cardRef.current.getBoundingClientRect(),
+              });
+            }
+            prepareProjectNavigation();
+          }}
           className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
           aria-label={`${project.title}. ${project.summary}`}
         />

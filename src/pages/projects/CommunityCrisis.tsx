@@ -1,10 +1,12 @@
 import { motion, useReducedMotion } from "motion/react";
 import Container from "../../components/Container";
+import { useHeroTransition } from "../../hooks/useHeroTransition";
 
 const IMG = "/images/projects/community-crisis";
 
 export default function CommunityCrisis() {
   const reduceMotion = useReducedMotion();
+  const heroImageRef = useHeroTransition("community-crisis");
   const heroInitial = reduceMotion
     ? false
     : { opacity: 0, filter: "blur(12px)", y: 8 };
@@ -73,7 +75,7 @@ export default function CommunityCrisis() {
       {/* ── Hero image (dark nav while nav overlaps this band) ── */}
       <section data-nav-theme="dark" aria-label="Project hero">
         <Container variant="full" className="mt-0">
-          <div className="relative h-[600px] overflow-hidden rounded-2xl">
+          <div ref={heroImageRef} className="relative h-[600px] overflow-hidden rounded-2xl">
             <img
               src={`${IMG}/hero2.png`}
               alt="Herd app interface showing the flare system"

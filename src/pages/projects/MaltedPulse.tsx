@@ -1,11 +1,13 @@
 import { Launch } from "@carbon/icons-react";
 import { motion, useReducedMotion } from "motion/react";
 import Container from "../../components/Container";
+import { useHeroTransition } from "../../hooks/useHeroTransition";
 
 const IMG = "/images/projects/malted-pulse";
 
 export default function MaltedPulse() {
   const reduceMotion = useReducedMotion();
+  const heroImageRef = useHeroTransition("malted-pulse");
   const heroInitial = reduceMotion
     ? false
     : { opacity: 0, filter: "blur(12px)", y: 8 };
@@ -87,7 +89,10 @@ export default function MaltedPulse() {
 
       {/* ── Hero image ── */}
       <Container variant="full" className="mt-0">
-        <div className="h-[420px] overflow-hidden rounded-2xl bg-[#d1d0d0] md:h-[600px] lg:h-[720px]">
+        <div
+          ref={heroImageRef}
+          className="h-[420px] overflow-hidden rounded-2xl bg-[#d1d0d0] md:h-[600px] lg:h-[720px]"
+        >
           <img
             src={`${IMG}/hero.png`}
             alt="Pulse platform interface overview"

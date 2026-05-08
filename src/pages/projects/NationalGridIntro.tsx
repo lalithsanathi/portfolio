@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import Container from "../../components/Container";
+import { useHeroTransition } from "../../hooks/useHeroTransition";
 
 const IMG = "/images/projects/national-grid";
 const IMG_DS = "/images/projects/ibm-ng-ds";
@@ -112,6 +113,7 @@ function TextBlock({
 
 export default function NationalGridIntro() {
   const reduceMotion = useReducedMotion();
+  const heroImageRef = useHeroTransition("national-grid-intro");
   const heroInitial = reduceMotion
     ? false
     : { opacity: 0, filter: "blur(12px)", y: 8 };
@@ -191,7 +193,10 @@ export default function NationalGridIntro() {
 
       {/* ── Hero image ── */}
       <Container variant="full" className="mt-0">
-        <div className="h-[420px] overflow-hidden rounded-2xl bg-[#d1d0d0] md:h-[600px] lg:h-[720px]">
+        <div
+          ref={heroImageRef}
+          className="h-[420px] overflow-hidden rounded-2xl bg-[#d1d0d0] md:h-[600px] lg:h-[720px]"
+        >
           <img
             src={`${IMG}/hero.png`}
             alt="National Grid balancing platform interface"

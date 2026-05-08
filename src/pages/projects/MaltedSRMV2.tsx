@@ -9,6 +9,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Container from "../../components/Container";
 import { smoothScrollTo } from "../../utils/smoothScroll";
+import { useHeroTransition } from "../../hooks/useHeroTransition";
 
 const IMG = "/images/projects/malted-srm";
 const IMG_V2 = "/images/projects/malted-srm-v2";
@@ -451,6 +452,7 @@ function AccuracyCard() {
 
 export default function MaltedSRMV2() {
   const reduceMotion = useReducedMotion();
+  const heroImageRef = useHeroTransition("malted-srm");
   const heroInitial = reduceMotion
     ? false
     : { opacity: 0, filter: "blur(12px)", y: 8 };
@@ -525,7 +527,10 @@ export default function MaltedSRMV2() {
       </section>
 
       <Container variant="full" className="mt-0">
-        <div className="h-[420px] overflow-hidden rounded-2xl bg-[#d1d0d0] md:h-[600px] lg:h-[720px]">
+        <div
+          ref={heroImageRef}
+          className="h-[420px] overflow-hidden rounded-2xl bg-[#d1d0d0] md:h-[600px] lg:h-[720px]"
+        >
           <img
             src={`${IMG_V2}/hero.png`}
             alt="AI background check product on a desktop monitor"
@@ -800,11 +805,18 @@ export default function MaltedSRMV2() {
           </TextBlock>
 
           <div className="col-span-12 mt-14 lg:col-span-10 lg:col-start-2">
-            <img
-              src={`${IMG}/ref-exploration.png`}
-              alt="Referencing explorations for linking fields to source documents"
-              className="w-full rounded-2xl"
-            />
+            <div className="grid gap-5 lg:grid-cols-2">
+              <img
+                src="/images/projects/malted-pulse/refining-references/Frame 1430105697.png"
+                alt="Label tag approach for linking extracted fields to their source in the document"
+                className="w-full rounded-2xl"
+              />
+              <img
+                src="/images/projects/malted-pulse/refining-references/Frame 1430106468.png"
+                alt="Highlight approach for linking extracted fields to their source in the document"
+                className="w-full rounded-2xl"
+              />
+            </div>
             <div className="mt-10 grid gap-x-16 gap-y-4 text-2xl uppercase leading-6 text-[#bd1919] lg:grid-cols-2">
               <ul className="space-y-4">
                 <li>× Too precise for the model</li>
@@ -817,6 +829,14 @@ export default function MaltedSRMV2() {
                 <li>× Overlapping fields are hard to see</li>
               </ul>
             </div>
+          </div>
+
+          <div className="col-span-12 mt-14 lg:col-span-10 lg:col-start-2">
+            <img
+              src="/images/projects/malted-pulse/refining-references/Frame 1430106469.png"
+              alt="Chosen circle highlight approach for linking extracted fields to their source"
+              className="w-full rounded-2xl"
+            />
           </div>
 
           <div className="col-span-12 mt-28 lg:col-span-10 lg:col-start-2">

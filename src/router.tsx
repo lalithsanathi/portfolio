@@ -11,6 +11,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import LightboxProvider from './components/Lightbox';
 import SiteNav from './components/SiteNav';
+import { ProjectTransitionProvider } from './projectTransition';
 import { ROUTE_BG_CROSSFADE_S, ROUTE_SHELL_WARM } from './routeShell';
 
 /** Full-viewport shell so /about (black) and other routes (warm) cross-fade instead of snapping. */
@@ -37,13 +38,15 @@ function RouteBackground() {
 
 function RootLayout() {
   return (
-    <LightboxProvider>
-      <RouteBackground />
-      <div className="relative z-10 min-h-screen">
-        <SiteNav />
-        <Outlet />
-      </div>
-    </LightboxProvider>
+    <ProjectTransitionProvider>
+      <LightboxProvider>
+        <RouteBackground />
+        <div className="relative z-10 min-h-screen">
+          <SiteNav />
+          <Outlet />
+        </div>
+      </LightboxProvider>
+    </ProjectTransitionProvider>
   );
 }
 
