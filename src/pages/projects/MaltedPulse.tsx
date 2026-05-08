@@ -78,14 +78,25 @@ export default function MaltedPulse() {
               rel="noopener noreferrer"
               className="inline-flex w-fit items-center gap-3 border-b border-stone-800/30 pb-2 text-2xl uppercase text-stone-800 hover:border-stone-900/50 hover:text-stone-900"
             >
-              See Pulse
+              Pulse is live!
               <Launch size={28} />
             </a>
           </motion.div>
         </div>
       </section>
 
+      {/* ── Hero image ── */}
       <Container variant="full" className="mt-0">
+        <div className="h-[420px] overflow-hidden rounded-2xl bg-[#d1d0d0] md:h-[600px] lg:h-[720px]">
+          <img
+            src={`${IMG}/hero.png`}
+            alt="Pulse platform interface overview"
+            className="size-full object-cover"
+          />
+        </div>
+      </Container>
+
+      <Container variant="full" className="mt-8">
         <img
           src={`${IMG}/outcome-reporting.jpg`}
           alt="Pulse outcome reporting: dashboards and data views for case outcomes"
@@ -108,23 +119,6 @@ export default function MaltedPulse() {
           className="w-full rounded-2xl"
         />
       </Container>
-
-      {/* ── Hero image ── */}
-      {/* <Container variant="full" className="mt-16">
-        <div className="relative overflow-hidden rounded-2xl h-[605px]">
-          <img
-            src="/images/projects/malted-pulse/hero-bg.png"
-            alt=""
-            className="absolute inset-0 size-full object-cover"
-            aria-hidden
-          />
-          <img
-            src="/images/projects/malted-pulse/hero-screenshot.png"
-            alt="Pulse platform showing a document review interface with extracted personal details and verification workflow"
-            className="absolute left-1/2 top-[34px] -translate-x-1/2 h-[660px] w-[891px] object-cover"
-          />
-        </div>
-      </Container> */}
     </main>
   );
 }

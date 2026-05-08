@@ -3,7 +3,7 @@ import { ROUTE_BG_CROSSFADE_S } from '../routeShell';
 
 const designPrinciples = [
   {
-    title: 'Extreme analogising',
+    title: 'Thinking in analogy',
     body: 'I can’t help but see the world through analogy. Everything reminds me of something else, whether that’s comparing content structuring to video compression, or LLM distillation to a plinko game. This has especially been a boon when communicating, especially complex concepts that need to be understood intuitively.',
   },
   {

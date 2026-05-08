@@ -51,7 +51,7 @@ export default function HomeBackup() {
           rightColumn={
             <ProjectCard
               title="AI Accelerated Due Diligence"
-              href="/projects/malted-srm"
+              href="/projects/malted-srm-v2"
               size="tall"
               imageSrc="/images/projects/malted-srm/project-card-image.png"
               variant="light"

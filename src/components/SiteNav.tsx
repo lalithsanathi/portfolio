@@ -11,14 +11,21 @@ import {
   type MouseEvent,
 } from 'react';
 import {
-  animate,
   AnimatePresence,
   motion,
   stagger,
   useMotionValue,
   useReducedMotion,
 } from 'motion/react';
+import {
+  getNavThemeOverride,
+  subscribeNavProgrammaticScroll,
+  subscribeNavScrollCancel,
+  subscribeNavThemeOverride,
+  type NavTheme,
+} from '../navControls';
 import { ROUTE_BG_CROSSFADE_S } from '../routeShell';
+import { smoothScrollTo } from '../utils/smoothScroll';
 import { getWorkScrollOffset } from '../utils/workScroll';
 
 const navSpring = {
@@ -27,6 +34,193 @@ const navSpring = {
   damping: 12.5,
   mass: 0.5,
 };
+
+type NumericMotionValue = {
+  get: () => number;
+  set: (latest: number) => void;
+};
+
+type NavTopAnimation = {
+  stop: () => void;
+  getVelocity: () => number;
+};
+
+const NAV_SPRING_MAX_VISIBLE_DT_MS = 1000 / 60;
+const NAV_SPRING_REST_SPEED = 2;
+const NAV_SPRING_REST_DELTA = 0.5;
+
+function createNavSpringResolver({
+  from,
+  to,
+  velocity = 0,
+}: {
+  from: number;
+  to: number;
+  velocity?: number;
+}) {
+  const stiffness = navSpring.stiffness;
+  const damping = navSpring.damping;
+  const mass = navSpring.mass;
+  const initialDelta = to - from;
+
+  if (Math.abs(initialDelta) <= NAV_SPRING_REST_DELTA) {
+    return {
+      next: () => ({ value: to, velocity: 0, done: true }),
+    };
+  }
+
+  const initialVelocity = -velocity / 1000;
+  const undampedAngularFreq = Math.sqrt(stiffness / mass) / 1000;
+  const dampingRatio = damping / (2 * Math.sqrt(stiffness * mass));
+  let resolveSpring: (t: number) => number;
+  let resolveVelocity: (t: number) => number;
+
+  if (dampingRatio < 1) {
+    const angularFreq =
+      undampedAngularFreq * Math.sqrt(1 - dampingRatio * dampingRatio);
+    const a =
+      (initialVelocity + dampingRatio * undampedAngularFreq * initialDelta) /
+      angularFreq;
+    const sinCoeff =
+      dampingRatio * undampedAngularFreq * a + initialDelta * angularFreq;
+    const cosCoeff =
+      dampingRatio * undampedAngularFreq * initialDelta - a * angularFreq;
+
+    resolveSpring = (t) => {
+      const envelope = Math.exp(-dampingRatio * undampedAngularFreq * t);
+      return (
+        to -
+        envelope *
+          (a * Math.sin(angularFreq * t) +
+            initialDelta * Math.cos(angularFreq * t))
+      );
+    };
+    resolveVelocity = (t) => {
+      const envelope = Math.exp(-dampingRatio * undampedAngularFreq * t);
+      return (
+        envelope *
+        (sinCoeff * Math.sin(angularFreq * t) +
+          cosCoeff * Math.cos(angularFreq * t)) *
+        1000
+      );
+    };
+  } else if (dampingRatio === 1) {
+    const c = initialVelocity + undampedAngularFreq * initialDelta;
+    resolveSpring = (t) =>
+      to -
+      Math.exp(-undampedAngularFreq * t) *
+        (initialDelta + (initialVelocity + undampedAngularFreq * initialDelta) * t);
+    resolveVelocity = (t) =>
+      Math.exp(-undampedAngularFreq * t) *
+      (undampedAngularFreq * c * t - initialVelocity) *
+      1000;
+  } else {
+    const dampedAngularFreq =
+      undampedAngularFreq * Math.sqrt(dampingRatio * dampingRatio - 1);
+    const p =
+      (initialVelocity + dampingRatio * undampedAngularFreq * initialDelta) /
+      dampedAngularFreq;
+    const sinhCoeff =
+      dampingRatio * undampedAngularFreq * p -
+      initialDelta * dampedAngularFreq;
+    const coshCoeff =
+      dampingRatio * undampedAngularFreq * initialDelta -
+      p * dampedAngularFreq;
+
+    resolveSpring = (t) => {
+      const envelope = Math.exp(-dampingRatio * undampedAngularFreq * t);
+      const freqForT = Math.min(dampedAngularFreq * t, 300);
+      return (
+        to -
+        (envelope *
+          ((initialVelocity + dampingRatio * undampedAngularFreq * initialDelta) *
+            Math.sinh(freqForT) +
+            dampedAngularFreq *
+              initialDelta *
+              Math.cosh(freqForT))) /
+          dampedAngularFreq
+      );
+    };
+    resolveVelocity = (t) => {
+      const envelope = Math.exp(-dampingRatio * undampedAngularFreq * t);
+      const freqForT = Math.min(dampedAngularFreq * t, 300);
+      return (
+        envelope *
+        (sinhCoeff * Math.sinh(freqForT) +
+          coshCoeff * Math.cosh(freqForT)) *
+        1000
+      );
+    };
+  }
+
+  return {
+    next: (elapsedMs: number) => {
+      const value = resolveSpring(elapsedMs);
+      const currentVelocity = resolveVelocity(elapsedMs);
+      const done =
+        Math.abs(currentVelocity) <= NAV_SPRING_REST_SPEED &&
+        Math.abs(to - value) <= NAV_SPRING_REST_DELTA;
+
+      return {
+        value: done ? to : value,
+        velocity: done ? 0 : currentVelocity,
+        done,
+      };
+    },
+  };
+}
+
+function springNavTopTo(
+  value: NumericMotionValue,
+  target: number,
+  initialVelocity = 0,
+): NavTopAnimation {
+  const resolver = createNavSpringResolver({
+    from: value.get(),
+    to: target,
+    velocity: initialVelocity,
+  });
+  let frame: number | null = null;
+  let stopped = false;
+  let elapsedMs = 0;
+  let lastTimestamp = performance.now();
+  let latestVelocity = initialVelocity;
+
+  const step = (timestamp: number) => {
+    if (stopped) return;
+
+    const dt = Math.min(
+      Math.max(timestamp - lastTimestamp, 0),
+      NAV_SPRING_MAX_VISIBLE_DT_MS,
+    );
+    lastTimestamp = timestamp;
+    elapsedMs += dt;
+
+    const next = resolver.next(elapsedMs);
+    latestVelocity = next.velocity;
+    value.set(next.value);
+
+    if (next.done) {
+      frame = null;
+      return;
+    }
+
+    frame = requestAnimationFrame(step);
+  };
+
+  frame = requestAnimationFrame(step);
+
+  return {
+    stop: () => {
+      stopped = true;
+      if (frame !== null) {
+        cancelAnimationFrame(frame);
+        frame = null;
+      }
+    },
+    getVelocity: () => latestVelocity,
+  };
+}
 
 /** Interval between each nav item’s layout shift (lead → Work → About). */
 const NAV_CLUSTER_LAYOUT_STAGGER_S = 0.029;
@@ -43,34 +237,12 @@ const NAV_JUMP_THRESHOLD_PX = 600;
  *  user input that immediately follows is not misclassified. */
 const NAV_PROGRAMMATIC_WINDOW_MS = 200;
 
-type NavTheme = 'light' | 'dark';
-
 /**
- * Subscriber set for `markNavProgrammaticScroll()`. SiteNav registers a
- * listener on mount; external callers can flag any upcoming scroll change as
- * programmatic and force the nav to spring to its new resting top, even if
- * `|dy|` is below the threshold.
- *
- * Usage:
- *   import { markNavProgrammaticScroll } from '@/components/SiteNav';
- *   markNavProgrammaticScroll();
- *   window.scrollTo({ top: 200 });
+ * SiteNav subscribes to navControls so external callers can flag upcoming
+ * scroll changes as programmatic or cancel nav-owned smooth scrolls before
+ * route navigation starts.
  */
-const programmaticListeners = new Set<() => void>();
-
-export function markNavProgrammaticScroll() {
-  programmaticListeners.forEach((fn) => fn());
-}
-
 let hasPlayedNavEntry = false;
-
-const navThemeOverrideListeners = new Set<(theme: NavTheme | null) => void>();
-let navThemeOverride: NavTheme | null = null;
-
-export function setNavThemeOverride(theme: NavTheme | null) {
-  navThemeOverride = theme;
-  navThemeOverrideListeners.forEach((fn) => fn(theme));
-}
 
 /**
  * Vertical positions per breakpoint, in px — also tune hero `padding-top` /
@@ -126,33 +298,6 @@ function getBreakpoint(): Breakpoint {
   return 'sm';
 }
 
-function smoothScrollTo(targetTop: number, durationMs = 1200) {
-  const start = window.scrollY;
-  const distance = targetTop - start;
-  const startTime = performance.now();
-  let frame: number | null = null;
-
-  const easeInOutCubic = (p: number) =>
-    p < 0.5 ? 4 * p ** 3 : 1 - (-2 * p + 2) ** 3 / 2;
-
-  const step = (now: number) => {
-    const t = Math.min((now - startTime) / durationMs, 1);
-    window.scrollTo({
-      top: start + distance * easeInOutCubic(t),
-      behavior: 'auto',
-    });
-    if (t < 1) {
-      frame = requestAnimationFrame(step);
-    }
-  };
-
-  frame = requestAnimationFrame(step);
-
-  return () => {
-    if (frame !== null) cancelAnimationFrame(frame);
-  };
-}
-
 /** Scroll + resize theme sampling runs on window; scroll is delegated to SiteNav's
  *  passive listener via `scheduleThemeSample` so hit-testing fires at most once per
  *  scroll event path (fewer observers + identical timing). */
@@ -160,13 +305,18 @@ function useNavTheme(
   navClusterRef: React.RefObject<HTMLDivElement | null>,
   pathname: string,
 ) {
-  const [theme, setTheme] = useState<NavTheme>(navThemeOverride ?? 'light');
+  const [theme, setTheme] = useState<NavTheme>(
+    getNavThemeOverride() ?? 'light',
+  );
   const themeSnapshotRef = useRef(theme);
-  themeSnapshotRef.current = theme;
   const [overrideVersion, setOverrideVersion] = useState(0);
-  const overrideRef = useRef<NavTheme | null>(navThemeOverride);
+  const overrideRef = useRef<NavTheme | null>(getNavThemeOverride());
 
   const scheduleThemeSampleRef = useRef<() => void>(() => {});
+
+  useLayoutEffect(() => {
+    themeSnapshotRef.current = theme;
+  }, [theme]);
 
   useEffect(() => {
     const onOverrideChange = (nextOverride: NavTheme | null) => {
@@ -175,10 +325,7 @@ function useNavTheme(
       if (nextOverride !== null) setTheme(nextOverride);
     };
 
-    navThemeOverrideListeners.add(onOverrideChange);
-    return () => {
-      navThemeOverrideListeners.delete(onOverrideChange);
-    };
+    return subscribeNavThemeOverride(onOverrideChange);
   }, []);
 
   useLayoutEffect(() => {
@@ -289,7 +436,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   const navTop = useMotionValue<number>(NAV_BREAKPOINTS.sm.initialTop);
   const cancelScrollRef = useRef<(() => void) | null>(null);
   const pillMovementDelayTimerRef = useRef<number | null>(null);
-  const shouldPlayNavEntryRef = useRef(!hasPlayedNavEntry);
+  const [shouldPlayNavEntry] = useState(() => !hasPlayedNavEntry);
 
   const [jumpThreshold, setJumpThresholdState] = useState(NAV_JUMP_THRESHOLD_PX);
   const jumpThresholdRef = useRef(jumpThreshold);
@@ -372,14 +519,20 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
 
   // Register the imperative API.
   useEffect(() => {
-    const mark = () => {
+    const mark = (durationMs = NAV_PROGRAMMATIC_WINDOW_MS) => {
       programmaticUntilRef.current =
-        performance.now() + NAV_PROGRAMMATIC_WINDOW_MS;
+        performance.now() + durationMs;
       setProgrammaticTick((n) => n + 1);
     };
-    programmaticListeners.add(mark);
+    const cancelActiveScroll = () => {
+      cancelScrollRef.current?.();
+      cancelScrollRef.current = null;
+    };
+    const unsubscribeProgrammatic = subscribeNavProgrammaticScroll(mark);
+    const unsubscribeCancel = subscribeNavScrollCancel(cancelActiveScroll);
     return () => {
-      programmaticListeners.delete(mark);
+      unsubscribeProgrammatic();
+      unsubscribeCancel();
     };
   }, []);
 
@@ -393,6 +546,8 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
       firstPathnameRunRef.current = false;
       return;
     }
+    cancelScrollRef.current?.();
+    cancelScrollRef.current = null;
     programmaticUntilRef.current =
       performance.now() + NAV_PROGRAMMATIC_WINDOW_MS;
     setProgrammaticTick((n) => n + 1);
@@ -428,7 +583,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     const startTime = performance.now();
     let prevY = window.scrollY;
     let settleTimer: number | null = null;
-    let inflight: { stop: () => void } | null = null;
+    let inflight: NavTopAnimation | null = null;
     let lastStuck = prevY >= stickPoint;
 
     // Sync immediately on mount and breakpoint change.
@@ -464,11 +619,12 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
         // scroll-restoration immediately followed by `scrollTo(#work)`)
         // collapses into a single animation to the final position.
         if (settleTimer !== null) window.clearTimeout(settleTimer);
+        const currentVelocity = inflight?.getVelocity() ?? 0;
         inflight?.stop();
 
         settleTimer = window.setTimeout(() => {
           const target = computeNavTop(window.scrollY);
-          inflight = animate(navTop, target, navSpring);
+          inflight = springNavTopTo(navTop, target, currentVelocity);
           settleTimer = null;
         }, SETTLE_DELAY_MS);
       } else if (settleTimer === null) {
@@ -496,7 +652,14 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   // to `stuck` avoids mutating the URL mid-scroll just to clear the hash.
   const isWorkDestination =
     isHome && (hash === 'work' || hash === '#work') && stuck;
-  const destinationStuck = stuck || isWorkDestination;
+  // While a non-home → /#work navigation is mid-flight, the new pathname
+  // commits before Home's scrollTo runs. In that window stuck is still false,
+  // so without this guard `showHomeIcon` flips false → true once the scroll
+  // lands — the lead exits, Work/About slide left, then everything snaps
+  // back. delayPillEntranceForMovement is already true for exactly this
+  // window, so we reuse it to lock the destination state.
+  const destinationStuck =
+    stuck || isWorkDestination || delayPillEntranceForMovement;
   const pillVisible = destinationStuck;
   const showHomeIcon = !isHome || destinationStuck;
 
@@ -672,7 +835,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
 
   const heroInitial = reduceMotion
     ? false
-    : shouldPlayNavEntryRef.current
+    : shouldPlayNavEntry
       ? { opacity: 0, filter: 'blur(12px)', y: 8 }
       : false;
   const heroAnimate = reduceMotion
@@ -949,12 +1112,18 @@ function NavJumpThresholdTuner({
   useEffect(() => {
     const remaining = programmaticUntilRef.current - performance.now();
     if (remaining <= 0) return;
-    setProgrammaticActive(true);
-    const id = window.setTimeout(
+
+    const activateId = window.setTimeout(() => {
+      setProgrammaticActive(true);
+    }, 0);
+    const deactivateId = window.setTimeout(
       () => setProgrammaticActive(false),
       remaining,
     );
-    return () => window.clearTimeout(id);
+    return () => {
+      window.clearTimeout(activateId);
+      window.clearTimeout(deactivateId);
+    };
   }, [programmaticTick, programmaticUntilRef]);
 
   const lastIsJump = lastDy > threshold;
