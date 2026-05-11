@@ -1,10 +1,12 @@
 import { motion, useReducedMotion } from "motion/react";
 import Container from "../../components/Container";
+import { EXIT_FADE_DURATION_S, useExitFade } from "../../hooks/useExitFade";
 
 const IMG = "/images/projects/community-crisis";
 
 export default function CommunityCrisis() {
   const reduceMotion = useReducedMotion();
+  const isExiting = useExitFade();
   const heroInitial = reduceMotion
     ? false
     : { opacity: 0, filter: "blur(12px)", y: 8 };
@@ -19,7 +21,11 @@ export default function CommunityCrisis() {
   };
 
   return (
-    <main className="pb-40" data-lightbox>
+    <motion.main
+      animate={reduceMotion ? undefined : { opacity: isExiting ? 0 : 1 }}
+      transition={{ duration: EXIT_FADE_DURATION_S, ease: [0.2, 0, 0, 1] }}
+      className="pb-40"
+      data-lightbox>
       <section className="bg-gray-warm-200 px-10 pb-16 pt-44 lg:px-20 md:pt-36 xl:pt-44 2xl:pt-72 [@media(min-width:1280px)_and_(pointer:coarse)]:pt-52! 2xl:px-page-edge-2xl">
         <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-12">
           <motion.h1
@@ -429,6 +435,6 @@ export default function CommunityCrisis() {
           </div>
         </div>
       </Container>
-    </main>
+    </motion.main>
   );
 }
