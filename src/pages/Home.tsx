@@ -19,7 +19,6 @@ import {
 } from '../navControls';
 import { useImagesLoaded } from '../hooks/useImagesLoaded';
 import { getWorkScrollOffset } from '../utils/workScroll';
-import { useProjectTransition } from '../projectTransition';
 
 interface HomeProject {
   id: string;
@@ -102,13 +101,15 @@ const projects: HomeProject[] = [
 /** Keep the card itself free of animated filters; WebKit can snap `filter` on image-containing layers. */
 const gridCardSpring = { type: 'spring' as const, duration: 0.6, bounce: 0 };
 
+const GRID_STAGGER_STEP = 0.08;
+
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 8 },
-  visible: {
+  visible: (delay: number) => ({
     opacity: 1,
     y: 0,
-    transition: gridCardSpring,
-  },
+    transition: { ...gridCardSpring, delay },
+  }),
 };
 
 const imageBlurOverlayVariants: Variants = {
@@ -178,25 +179,15 @@ const heroHeadingContainerVariants: Variants = {
   },
 };
 
-/** Parent drives stagger; cards are direct motion children so variant propagation works (Link cannot wrap the motion node). */
-function makeGridContainerVariants(
-  reduceMotion: boolean | null,
+/** Compute per-card base delay so skipped (above-viewport) cards don't waste stagger slots. */
+function getGridBaseDelay(
+  numSkipped: number,
+  playFullSessionHero: boolean,
   startsAtTop: boolean | null,
-  useDeferredHeroTiming: boolean,
-): Variants {
-  if (reduceMotion) return staticVariants;
-  const delayChildren = useDeferredHeroTiming
-    ? (HERO_SUBTEXT_DELAY + HERO_GRID_DELAY_AFTER_SUBTEXT) as number
-    : ((startsAtTop ? 0.55 : 0.05) as number);
-  return {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren,
-      },
-    },
-  };
+): number {
+  if (numSkipped > 0) return 0.05;
+  if (playFullSessionHero) return HERO_SUBTEXT_DELAY + HERO_GRID_DELAY_AFTER_SUBTEXT;
+  return startsAtTop ? 0.55 : 0.05;
 }
 
 interface ProjectCardProps {
@@ -204,6 +195,8 @@ interface ProjectCardProps {
   index: number;
   reduceMotion: boolean | null;
   blurOverlayEnabled: boolean;
+  skipAnimation: boolean;
+  staggerDelay: number;
 }
 
 function prepareProjectNavigation() {
@@ -216,14 +209,16 @@ function ProjectCard({
   index,
   reduceMotion,
   blurOverlayEnabled,
+  skipAnimation,
+  staggerDelay,
 }: ProjectCardProps) {
-  const { capture } = useProjectTransition();
-  const cardRef = useRef<HTMLDivElement>(null);
-
   return (
     <motion.div
-      ref={cardRef}
       variants={reduceMotion ? staticVariants : itemVariants}
+      custom={staggerDelay}
+      {...(!reduceMotion && skipAnimation
+        ? { animate: { opacity: 1, y: 0 }, transition: { duration: 0 } }
+        : undefined)}
       className={`group relative aspect-7/6 overflow-hidden rounded-2xl shadow-[0_1px_0_rgba(255,255,255,0.35)_inset] transition-shadow duration-500 ease-[cubic-bezier(0.2,0,0,1)] hover:shadow-[0_22px_70px_rgba(29,28,26,0.12)] focus-within:shadow-[0_22px_70px_rgba(29,28,26,0.12)] ${project.className}`}
       {...(project.navTheme
         ? { 'data-nav-theme': project.navTheme }
@@ -231,15 +226,22 @@ function ProjectCard({
     >
       {project.imageSrc ? (
         <>
-          <img
-            src={project.imageSrc}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)] will-change-transform group-hover:scale-[1.035] group-focus-within:scale-[1.035]"
-            loading={index < 2 ? 'eager' : 'lazy'}
-            fetchPriority={index < 2 ? 'high' : 'auto'}
-            decoding="async"
-          />
-          {!reduceMotion && blurOverlayEnabled ? (
+          <motion.div
+            layoutId={project.href ? `project-hero-${project.id}` : undefined}
+            className="absolute inset-0"
+            style={{ borderRadius: 16, overflow: 'hidden' }}
+            transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
+          >
+            <img
+              src={project.imageSrc}
+              alt=""
+              className="h-full w-full object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)] will-change-transform group-hover:scale-[1.035] group-focus-within:scale-[1.035]"
+              loading={index < 2 ? 'eager' : 'lazy'}
+              fetchPriority={index < 2 ? 'high' : 'auto'}
+              decoding="async"
+            />
+          </motion.div>
+          {!reduceMotion && blurOverlayEnabled && !skipAnimation ? (
             <motion.img
               src={project.imageSrc}
               alt=""
@@ -289,15 +291,7 @@ function ProjectCard({
         <Link
           to={project.href}
           preload="viewport"
-          onClick={() => {
-            if (cardRef.current) {
-              capture({
-                projectId: project.id,
-                rect: cardRef.current.getBoundingClientRect(),
-              });
-            }
-            prepareProjectNavigation();
-          }}
+          onClick={() => prepareProjectNavigation()}
           className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
           aria-label={`${project.title}. ${project.summary}`}
         />
@@ -336,6 +330,10 @@ export default function Home() {
       window.location.hash !== '#work',
   );
 
+  const [skipAboveViewport, setSkipAboveViewport] = useState<boolean[]>(
+    () => projects.map(() => false),
+  );
+
   const projectImageUrls = projects
     .map((p) => p.imageSrc)
     .filter((src): src is string => Boolean(src));
@@ -346,15 +344,8 @@ export default function Home() {
     projectsInView &&
     projectImagesReady &&
     !workGridMotionDeferred;
-  const gridContainerVariants = useMemo(
-    () =>
-      makeGridContainerVariants(
-        reduceMotion,
-        startsAtTop,
-        playFullSessionHero,
-      ),
-    [reduceMotion, startsAtTop, playFullSessionHero],
-  );
+  const numSkipped = skipAboveViewport.filter(Boolean).length;
+  const gridBaseDelay = getGridBaseDelay(numSkipped, playFullSessionHero, startsAtTop);
 
   const heroInitial = reduceMotion
     ? false
@@ -416,6 +407,16 @@ export default function Home() {
       window.clearTimeout(revealTimer);
       if (revealFrame !== null) cancelAnimationFrame(revealFrame);
     };
+  }, []);
+
+  useLayoutEffect(() => {
+    const grid = projectGridRef.current;
+    if (!grid) return;
+
+    const children = Array.from(grid.children) as HTMLElement[];
+    const flags = children.map((el) => el.getBoundingClientRect().bottom <= 0);
+
+    if (flags.some(Boolean)) setSkipAboveViewport(flags);
   }, []);
 
   useEffect(() => {
@@ -551,19 +552,25 @@ export default function Home() {
         id="work"
         className="mx-auto mt-32 grid w-full max-w-screen-2xl scroll-mt-20 grid-cols-1 gap-4 md:mt-24 xl:mt-24 2xl:mt-40 md:scroll-mt-24 md:grid-cols-2"
         style={{ visibility: startsAtTop === null ? 'hidden' : undefined }}
-        variants={gridContainerVariants}
+        variants={staticVariants}
         initial="hidden"
         animate={gridRevealReady ? 'visible' : 'hidden'}
       >
-        {projects.map((project, index) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            index={index}
-            reduceMotion={reduceMotion}
-            blurOverlayEnabled={blurOverlaysEnabled}
-          />
-        ))}
+        {projects.map((project, index) => {
+          const skip = skipAboveViewport[index] ?? false;
+          const effectiveIndex = skip ? 0 : index - numSkipped;
+          return (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              index={index}
+              reduceMotion={reduceMotion}
+              blurOverlayEnabled={blurOverlaysEnabled}
+              skipAnimation={skip}
+              staggerDelay={gridBaseDelay + effectiveIndex * GRID_STAGGER_STEP}
+            />
+          );
+        })}
       </motion.section>
 
       {/* Tall dark band: same-route scroll test for `data-nav-theme` / SiteNav sampler */}

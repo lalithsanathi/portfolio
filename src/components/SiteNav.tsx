@@ -7,7 +7,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type MouseEvent,
 } from 'react';
 import {
@@ -298,9 +297,13 @@ function getBreakpoint(): Breakpoint {
   return 'sm';
 }
 
-/** Scroll + resize theme sampling runs on window; scroll is delegated to SiteNav's
- *  passive listener via `scheduleThemeSample` so hit-testing fires at most once per
- *  scroll event path (fewer observers + identical timing). */
+/** Theme sampling via IntersectionObserver against a top-of-viewport band that
+ *  spans every possible nav vertical resting position. When a `[data-nav-theme]`
+ *  element enters that band, it becomes a candidate for the nav backdrop;
+ *  the topmost candidate wins. No per-scroll DOM hit-test. */
+const NAV_THEME_BAND_TOP_PX = NAV_STUCK_TOP_PX;
+const NAV_THEME_BAND_BOTTOM_PX = NAV_BREAKPOINTS['2xl'].initialTop + 48;
+
 function useNavTheme(
   navClusterRef: React.RefObject<HTMLDivElement | null>,
   pathname: string,
@@ -311,8 +314,6 @@ function useNavTheme(
   const themeSnapshotRef = useRef(theme);
   const [overrideVersion, setOverrideVersion] = useState(0);
   const overrideRef = useRef<NavTheme | null>(getNavThemeOverride());
-
-  const scheduleThemeSampleRef = useRef<() => void>(() => {});
 
   useLayoutEffect(() => {
     themeSnapshotRef.current = theme;
@@ -329,68 +330,90 @@ function useNavTheme(
   }, []);
 
   useLayoutEffect(() => {
-    let frame: number | null = null;
+    if (overrideRef.current !== null) {
+      const o = overrideRef.current;
+      if (o !== themeSnapshotRef.current) setTheme(o);
+      return;
+    }
 
-    const sampleTheme = () => {
-      frame = null;
+    const intersecting = new Map<Element, NavTheme>();
+    let observer: IntersectionObserver | null = null;
+    let resizeFrame: number | null = null;
 
-      if (overrideRef.current !== null) {
-        const o = overrideRef.current;
-        if (o !== themeSnapshotRef.current) {
-          setTheme(o);
+    const themeOf = (el: Element): NavTheme =>
+      (el as HTMLElement).dataset.navTheme === 'dark' ? 'dark' : 'light';
+
+    const recompute = () => {
+      let bestTheme: NavTheme = 'light';
+      let bestTop = Infinity;
+      for (const [el, t] of intersecting) {
+        const top = el.getBoundingClientRect().top;
+        if (top < bestTop) {
+          bestTop = top;
+          bestTheme = t;
         }
-        return;
       }
-
-      const cluster = navClusterRef.current;
-      if (!cluster) {
-        if (themeSnapshotRef.current !== 'light') {
-          setTheme('light');
-        }
-        return;
-      }
-
-      const rect = cluster.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      const navRoot = cluster.closest('nav');
-
-      const themedElement = document
-        .elementsFromPoint(x, y)
-        .filter((element) => !navRoot?.contains(element))
-        .map((element) => element.closest<HTMLElement>('[data-nav-theme]'))
-        .find((element): element is HTMLElement => element != null);
-
-      const next: NavTheme =
-        themedElement?.dataset.navTheme === 'dark' ? 'dark' : 'light';
-      if (next !== themeSnapshotRef.current) {
-        setTheme(next);
-      }
+      if (bestTheme !== themeSnapshotRef.current) setTheme(bestTheme);
     };
 
-    const scheduleSample = () => {
-      if (frame !== null) return;
-      frame = requestAnimationFrame(sampleTheme);
+    const setupObserver = () => {
+      observer?.disconnect();
+      intersecting.clear();
+
+      const vh = window.innerHeight;
+      const bottomInset = Math.max(0, vh - NAV_THEME_BAND_BOTTOM_PX);
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              intersecting.set(entry.target, themeOf(entry.target));
+            } else {
+              intersecting.delete(entry.target);
+            }
+          }
+          recompute();
+        },
+        { rootMargin: `-${NAV_THEME_BAND_TOP_PX}px 0px -${bottomInset}px 0px` },
+      );
+
+      const navRoot = navClusterRef.current?.closest('nav');
+      const themed = document.querySelectorAll<HTMLElement>('[data-nav-theme]');
+      themed.forEach((el) => {
+        if (navRoot?.contains(el)) return;
+        observer!.observe(el);
+      });
+
+      // Synchronous seed: avoid a flash of `light` on routes that should be
+      // dark, since IntersectionObserver's first callback fires asynchronously.
+      themed.forEach((el) => {
+        if (navRoot?.contains(el)) return;
+        const r = el.getBoundingClientRect();
+        if (r.bottom > NAV_THEME_BAND_TOP_PX && r.top < NAV_THEME_BAND_BOTTOM_PX) {
+          intersecting.set(el, themeOf(el));
+        }
+      });
+      recompute();
     };
 
-    scheduleThemeSampleRef.current = scheduleSample;
+    setupObserver();
 
-    sampleTheme();
-    scheduleSample();
-    window.addEventListener('resize', scheduleSample);
+    const onResize = () => {
+      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = null;
+        setupObserver();
+      });
+    };
+    window.addEventListener('resize', onResize);
 
     return () => {
-      window.removeEventListener('resize', scheduleSample);
-      if (frame !== null) cancelAnimationFrame(frame);
-      scheduleThemeSampleRef.current = () => {};
+      observer?.disconnect();
+      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+      window.removeEventListener('resize', onResize);
     };
   }, [navClusterRef, overrideVersion, pathname]);
 
-  const scheduleThemeSample = useCallback(() => {
-    scheduleThemeSampleRef.current();
-  }, []);
-
-  return { theme, scheduleThemeSample };
+  return { theme };
 }
 
 /** Lead control next to Work: classic home glyph, or an arrow (up on Home for
@@ -424,7 +447,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     null,
   );
   const navClusterRef = useRef<HTMLDivElement | null>(null);
-  const { theme: navTheme, scheduleThemeSample } = useNavTheme(
+  const { theme: navTheme } = useNavTheme(
     navClusterRef,
     pathname,
   );
@@ -520,8 +543,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   // Register the imperative API.
   useEffect(() => {
     const mark = (durationMs = NAV_PROGRAMMATIC_WINDOW_MS) => {
-      programmaticUntilRef.current =
-        performance.now() + durationMs;
+      programmaticUntilRef.current = performance.now() + durationMs;
       setProgrammaticTick((n) => n + 1);
     };
     const cancelActiveScroll = () => {
@@ -598,8 +620,6 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
         setStuck(nextStuck);
       }
 
-      scheduleThemeSample();
-
       const dy = y - prevY;
       prevY = y;
 
@@ -615,16 +635,16 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
             Math.abs(dy) > jumpThresholdRef.current));
 
       if (isJump) {
-        // Hold navTop. Reset the settle timer so a series of jumps (e.g.
-        // scroll-restoration immediately followed by `scrollTo(#work)`)
-        // collapses into a single animation to the final position.
+        // In-page programmatic jumps (smoothScrollTo, large user scroll
+        // bursts) — coalesce a series of jumps into one spring to the final
+        // resting position.
         if (settleTimer !== null) window.clearTimeout(settleTimer);
-        const currentVelocity = inflight?.getVelocity() ?? 0;
         inflight?.stop();
+        inflight = null;
 
         settleTimer = window.setTimeout(() => {
           const target = computeNavTop(window.scrollY);
-          inflight = springNavTopTo(navTop, target, currentVelocity);
+          inflight = springNavTopTo(navTop, target);
           settleTimer = null;
         }, SETTLE_DELAY_MS);
       } else if (settleTimer === null) {
@@ -645,7 +665,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
       inflight?.stop();
       cancelScrollRef.current?.();
     };
-  }, [computeNavTop, navTop, reduceMotion, scheduleThemeSample, stickPoint]);
+  }, [computeNavTop, navTop, reduceMotion, stickPoint]);
 
   // `/#work` should force the stuck treatment once we have landed at the work
   // section, but not after the user scrolls back to the top. Keeping this tied
@@ -859,7 +879,12 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     : { duration: 0.34, ease: [0.2, 0, 0, 1] as const };
   const isDarkNav = navTheme === 'dark';
   const navTextClass = isDarkNav ? 'text-white/90' : 'text-black/80';
-  const hoverPillClass = isDarkNav ? 'bg-white/15' : 'bg-white/70';
+  // Hover pill is rendered as three opaque-white pieces inside a wrapper that
+  // carries the translucency. Compositing the whole group at the wrapper
+  // collapses any cap/bar overlap or anti-aliased seam into a single flat
+  // alpha — eliminates the dark band that appears when each piece is
+  // independently translucent.
+  const hoverPillAlpha = isDarkNav ? 0.15 : 0.7;
   const activeHoverTextClass = isDarkNav ? 'text-white' : 'text-black';
   const pillEntranceDelay =
     pillVisible && delayPillEntranceForMovement
@@ -869,6 +894,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
   return (
     <>
     <motion.nav
+      layoutScroll
       style={{ y: navTop }}
       className={`fixed top-0 left-[calc(--spacing(10)-18px)] z-50 flex items-center text-xl font-medium uppercase leading-8 will-change-transform lg:left-[calc(--spacing(20)-18px)] 2xl:left-[calc(max(5rem,calc((100vw-1536px)/2))-18px)] ${navTextClass}`}
     >
@@ -877,23 +903,12 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
           aria-hidden="true"
           data-theme={navTheme}
           className="liquid-glass-capsule pointer-events-none absolute inset-0 z-0 origin-left"
-          style={
-            {
-              '--nav-pill-backdrop-blur': pillVisible ? '20px' : '68px',
-              '--nav-pill-backdrop-blur-duration': isRouteThemeTransitioning
-                ? '600ms'
-                : '300ms',
-              '--nav-pill-backdrop-blur-delay': `${pillEntranceDelay}s`,
-            } as CSSProperties
-          }
           initial={false}
           animate={{
             opacity: pillVisible ? 1 : 0,
             scale: pillVisible ? 1 : 0.88,
           }}
           transition={{
-            // Keep show opacity quick: backdrop-filter is composited with opacity,
-            // so a long fade makes the frosted blur feel delayed.
             opacity: {
               duration: pillVisible
                 ? isRouteThemeTransitioning
@@ -935,33 +950,38 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
             {hoverPillRect != null ? (
               <motion.div
                 aria-hidden
-                className={`pointer-events-none absolute z-0 rounded-full ${hoverPillClass}`}
-                initial={{
-                  left: hoverPillRect.left,
-                  top: hoverPillRect.top,
-                  width: hoverPillRect.width,
-                  height: hoverPillRect.height,
-                  opacity: 0,
-                  scale: 0.72,
-                }}
-                animate={{
-                  left: hoverPillRect.left,
-                  top: hoverPillRect.top,
-                  width: hoverPillRect.width,
-                  height: hoverPillRect.height,
-                  opacity: 1,
-                  scale: 1,
-                }}
+                className="pointer-events-none absolute left-0 right-0 z-0"
+                style={{ top: hoverPillRect.top, height: hoverPillRect.height }}
+                initial={{ opacity: 0, scale: 0.72 }}
+                animate={{ opacity: hoverPillAlpha, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.72 }}
                 transition={{
-                  left: hoverPillTransition,
-                  top: hoverPillTransition,
-                  width: hoverPillTransition,
-                  height: hoverPillTransition,
                   opacity: hoverPillPresenceTransition,
                   scale: hoverPillPresenceTransition,
                 }}
-              />
+              >
+                <motion.div
+                  className="absolute top-0 left-0 size-10 rounded-full bg-white will-change-transform"
+                  animate={{ x: hoverPillRect.left }}
+                  transition={{ x: hoverPillTransition }}
+                />
+                <motion.div
+                  className="absolute top-0 left-0 size-10 rounded-full bg-white will-change-transform"
+                  animate={{ x: hoverPillRect.left + hoverPillRect.width - 40 }}
+                  transition={{ x: hoverPillTransition }}
+                />
+                <motion.div
+                  className="absolute top-0 left-0 h-10 w-px origin-left bg-white will-change-transform"
+                  animate={{
+                    x: hoverPillRect.left + 20,
+                    scaleX: Math.max(0, hoverPillRect.width - 40),
+                  }}
+                  transition={{
+                    x: hoverPillTransition,
+                    scaleX: hoverPillTransition,
+                  }}
+                />
+              </motion.div>
             ) : null}
           </AnimatePresence>
           <AnimatePresence initial={false} mode="popLayout">

@@ -66,16 +66,12 @@
 
   .liquid-glass-capsule::before {
     background: rgba(255, 255, 255, 0.001);
-    /* --nav-pill-backdrop-blur: show/hide easing without a `filter` sibling on top of this stack. */
-    -webkit-backdrop-filter: blur(var(--nav-pill-backdrop-blur, 20px)) saturate(1.8);
-    backdrop-filter: blur(var(--nav-pill-backdrop-blur, 20px)) saturate(1.8);
+    /* Static blur — show/hide is via the parent's opacity animation, not by
+     * animating backdrop-filter (filter swings are GPU-expensive every frame). */
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: blur(20px) saturate(1.8);
     transform: translateZ(0);
-    transition:
-      background 260ms cubic-bezier(0.2, 0, 0, 1),
-      -webkit-backdrop-filter var(--nav-pill-backdrop-blur-duration, 300ms) cubic-bezier(0.2, 0, 0, 1)
-        var(--nav-pill-backdrop-blur-delay, 0ms),
-      backdrop-filter var(--nav-pill-backdrop-blur-duration, 300ms) cubic-bezier(0.2, 0, 0, 1)
-        var(--nav-pill-backdrop-blur-delay, 0ms);
+    transition: background 260ms cubic-bezier(0.2, 0, 0, 1);
   }
 
   .liquid-glass-capsule-surface {
