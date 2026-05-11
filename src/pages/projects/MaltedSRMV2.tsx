@@ -773,36 +773,25 @@ export default function MaltedSRMV2() {
           </TextBlock>
 
           <div className="col-span-12 mt-14 lg:col-span-10 lg:col-start-2">
-            <div className="grid gap-5 lg:grid-cols-2">
-              <img
-                src="/images/projects/malted-pulse/refining-references/Frame 1430105697.png"
-                alt="Label tag approach for linking extracted fields to their source in the document"
-                className="w-full rounded-2xl"
-              />
-              <img
-                src="/images/projects/malted-pulse/refining-references/Frame 1430106468.png"
-                alt="Highlight approach for linking extracted fields to their source in the document"
-                className="w-full rounded-2xl"
-              />
-            </div>
-            <div className="mt-10 grid gap-x-16 gap-y-4 text-2xl uppercase leading-6 text-[#bd1919] lg:grid-cols-2">
-              <ul className="space-y-4">
-                <li>× Too precise for the model</li>
-                <li>× Can be easy to miss on some documents</li>
-                <li>× Can sometimes get in the way of info</li>
-              </ul>
-              <ul className="space-y-4">
-                <li>× Doesn’t look interactive</li>
-                <li>× A bit messy; feels stain-like</li>
-                <li>× Overlapping fields are hard to see</li>
-              </ul>
-            </div>
+            <img
+              src={`${IMG_V2}/bounding/bounding-1.png`}
+              alt="Exploration of one highlight approach for linking extracted fields to their source in the document"
+              className="w-full rounded-2xl"
+            />
           </div>
 
           <div className="col-span-12 mt-14 lg:col-span-10 lg:col-start-2">
             <img
-              src="/images/projects/malted-pulse/refining-references/Frame 1430106469.png"
-              alt="Chosen circle highlight approach for linking extracted fields to their source"
+              src={`${IMG_V2}/bounding/bounding-2.png`}
+              alt="Exploration of another highlight approach for linking extracted fields to their source in the document"
+              className="w-full rounded-2xl"
+            />
+          </div>
+
+          <div className="col-span-12 mt-14 lg:col-span-10 lg:col-start-2">
+            <img
+              src={`${IMG_V2}/bounding/bounding-final.png`}
+              alt="Chosen highlight approach for linking extracted fields to their source"
               className="w-full rounded-2xl"
             />
           </div>
