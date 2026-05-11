@@ -483,10 +483,11 @@ export default function MaltedSRMV2() {
 
       <Container variant="full" className="mt-0">
         <motion.div
-          layoutId="project-hero-malted-srm"
           className="h-[420px] overflow-hidden bg-[#d1d0d0] md:h-[600px] lg:h-[720px]"
           style={{ borderRadius: 16 }}
-          transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
+          initial={heroInitial}
+          animate={heroAnimate}
+          transition={{ ...spring, delay: 0.8 }}
         >
           <img
             src={`${IMG_V2}/hero.png`}

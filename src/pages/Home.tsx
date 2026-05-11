@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import {
   Fragment,
   useEffect,
@@ -197,6 +197,7 @@ interface ProjectCardProps {
   blurOverlayEnabled: boolean;
   skipAnimation: boolean;
   staggerDelay: number;
+  onNavigate: (href: string) => void;
 }
 
 function prepareProjectNavigation() {
@@ -211,6 +212,7 @@ function ProjectCard({
   blurOverlayEnabled,
   skipAnimation,
   staggerDelay,
+  onNavigate,
 }: ProjectCardProps) {
   return (
     <motion.div
@@ -226,11 +228,9 @@ function ProjectCard({
     >
       {project.imageSrc ? (
         <>
-          <motion.div
-            layoutId={project.href ? `project-hero-${project.id}` : undefined}
+          <div
             className="absolute inset-0"
             style={{ borderRadius: 16, overflow: 'hidden' }}
-            transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
           >
             <img
               src={project.imageSrc}
@@ -240,7 +240,7 @@ function ProjectCard({
               fetchPriority={index < 2 ? 'high' : 'auto'}
               decoding="async"
             />
-          </motion.div>
+          </div>
           {!reduceMotion && blurOverlayEnabled && !skipAnimation ? (
             <motion.img
               src={project.imageSrc}
@@ -291,7 +291,19 @@ function ProjectCard({
         <Link
           to={project.href}
           preload="viewport"
-          onClick={() => prepareProjectNavigation()}
+          onClick={(e) => {
+            if (
+              e.metaKey ||
+              e.ctrlKey ||
+              e.shiftKey ||
+              e.altKey ||
+              e.button !== 0
+            ) {
+              return;
+            }
+            e.preventDefault();
+            onNavigate(project.href!);
+          }}
           className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
           aria-label={`${project.title}. ${project.summary}`}
         />
@@ -305,11 +317,33 @@ function ProjectCard({
   );
 }
 
+const HOME_EXIT_FADE_S = 0.18;
+
 export default function Home() {
   const reduceMotion = useReducedMotion();
+  const navigate = useNavigate();
   const heroFullAnimAlreadyPlayed = useMemo(() => readHomeHeroFullAnimDone(), []);
   const playFullSessionHero = !reduceMotion && !heroFullAnimAlreadyPlayed;
   const projectGridRef = useRef<HTMLElement>(null);
+  const [isExiting, setIsExiting] = useState(false);
+  const exitTimerRef = useRef<number | null>(null);
+
+  const handleProjectNavigate = (href: string) => {
+    prepareProjectNavigation();
+    if (reduceMotion) {
+      navigate({ to: href });
+      return;
+    }
+    setIsExiting(true);
+    if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
+    exitTimerRef.current = window.setTimeout(() => {
+      navigate({ to: href });
+    }, HOME_EXIT_FADE_S * 1000);
+  };
+
+  useEffect(() => () => {
+    if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
+  }, []);
   /** Positive bottom rootMargin so below-the-fold grids still intersect on first paint (narrow viewports / iPad).
    * Negative margins shrink the root and defer intersection until extra scroll — bad for landing UX.
    * (`MarginType` only allows px | %, not vh.) */
@@ -467,7 +501,16 @@ export default function Home() {
   }, [playFullSessionHero]);
 
   return (
-    <main className="relative min-h-screen px-10 pb-48 pt-44 lg:px-20 md:pt-36 xl:pt-44 2xl:pt-72 [@media(min-width:1280px)_and_(pointer:coarse)]:pt-52! 2xl:px-page-edge-2xl">
+    <motion.main
+      animate={
+        reduceMotion ? undefined : { opacity: isExiting ? 0 : 1 }
+      }
+      transition={{
+        duration: HOME_EXIT_FADE_S,
+        ease: [0.2, 0, 0, 1],
+      }}
+      className="relative min-h-screen px-10 pb-48 pt-44 lg:px-20 md:pt-36 xl:pt-44 2xl:pt-72 [@media(min-width:1280px)_and_(pointer:coarse)]:pt-52! 2xl:px-page-edge-2xl"
+    >
       <motion.a
         href="https://www.linkedin.com/in/laliths/"
         aria-label="LinkedIn"
@@ -568,6 +611,7 @@ export default function Home() {
               blurOverlayEnabled={blurOverlaysEnabled}
               skipAnimation={skip}
               staggerDelay={gridBaseDelay + effectiveIndex * GRID_STAGGER_STEP}
+              onNavigate={handleProjectNavigate}
             />
           );
         })}
@@ -591,6 +635,6 @@ export default function Home() {
       >
         <div className="h-24 rounded-2xl bg-gray-warm-100 md:h-32" />
       </section> */}
-    </main>
+    </motion.main>
   );
 }

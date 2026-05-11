@@ -74,10 +74,11 @@ export default function CommunityCrisis() {
       <section data-nav-theme="dark" aria-label="Project hero">
         <Container variant="full" className="mt-0">
           <motion.div
-            layoutId="project-hero-community-crisis"
             className="relative h-[600px] overflow-hidden"
             style={{ borderRadius: 16 }}
-            transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
+            initial={heroInitial}
+            animate={heroAnimate}
+            transition={{ ...spring, delay: 0.65 }}
           >
             <img
               src={`${IMG}/hero2.png`}
