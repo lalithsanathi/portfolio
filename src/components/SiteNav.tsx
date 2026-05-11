@@ -793,6 +793,22 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
     setHoverPillRect(null);
   }, []);
 
+  // TanStack's scroll-restoration fires its scroll event before React commits
+  // the new route, so a useLayoutEffect on `pathname` is too late: the scroll
+  // listener reads `programmaticUntilRef` before it's been refreshed for the
+  // new navigation. For small dy (e.g. mid-scroll on home → /about scrolls
+  // back to 0), `dy < jumpThreshold` AND `isProgrammatic` is stale, so the
+  // scroll listener takes the "track instantly" branch and the nav snaps to
+  // its new resting position instead of springing.
+  //
+  // Fix: mark the navigation as programmatic synchronously, before navigate()
+  // runs. That way any scroll event TanStack subsequently fires is recognised
+  // as a jump and routed through the settle+spring path.
+  const markProgrammatic = useCallback(() => {
+    programmaticUntilRef.current =
+      performance.now() + NAV_PROGRAMMATIC_WINDOW_MS;
+  }, []);
+
   const handleHomeButtonClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
@@ -803,10 +819,11 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
         cancelScrollRef.current = smoothScrollTo(0);
         window.history.replaceState(null, '', '/');
       } else {
+        markProgrammatic();
         navigate({ to: '/' });
       }
     },
-    [clearNavHover, isHome, navigate],
+    [clearNavHover, isHome, markProgrammatic, navigate],
   );
 
   const handleWorkClick = useCallback(
@@ -829,6 +846,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
         // home-state. The home page is responsible for jumping to #work on
         // mount when the hash is present.
         delayPillUntilMovementSettles();
+        markProgrammatic();
         // Avoid TanStack scroll restoration + handleHashScroll (scrollIntoView)
         // racing Home's layout scrollTo. Safari often snaps filter/blur mid-spring
         // when a second scroll runs after the grid reveal starts.
@@ -840,7 +858,7 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
         });
       }
     },
-    [clearNavHover, delayPillUntilMovementSettles, isHome, navigate],
+    [clearNavHover, delayPillUntilMovementSettles, isHome, markProgrammatic, navigate],
   );
 
   const handleAboutClick = useCallback(
@@ -848,9 +866,10 @@ export default function SiteNav({ leadIcon = 'arrow' }: SiteNavProps = {}) {
       event.preventDefault();
       cancelScrollRef.current?.();
       clearNavHover();
+      markProgrammatic();
       navigate({ to: '/about' });
     },
-    [clearNavHover, navigate],
+    [clearNavHover, markProgrammatic, navigate],
   );
 
   const heroInitial = reduceMotion
