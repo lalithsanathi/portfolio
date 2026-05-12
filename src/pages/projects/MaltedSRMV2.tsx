@@ -461,8 +461,8 @@ export default function MaltedSRMV2() {
             transition={{ ...spring, delay: 0.5 }}
           >
             I owned the end-to-end experience of an AI-powered tool for S-RM, a
-            global intelligence and cyber security consultancy, aiming to help
-            accelerate their background check process. Over a 4-month period, we
+            global intelligence and cyber security consultancy, accelerating
+            their background check process. Over a 4-month period, we
             went through the process from discovery to a system that analysts
             genuinely trusted and wanted to use — demonstrating over £1M in
             potential annual value. I collaborated closely with ML engineers on
