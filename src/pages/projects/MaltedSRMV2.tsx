@@ -580,7 +580,7 @@ export default function MaltedSRMV2() {
         <p>
           Every case involves 2-3 hours of manual data entry. That’s skilled
           analysts copying and pasting between documents, re-entering data
-          across files, formatting reports, repeated thousands of times a
+          across files`, formatting reports, repeated thousands of times a
           year.
         </p>
       </BlackBand>
@@ -746,7 +746,7 @@ export default function MaltedSRMV2() {
                 Confidence scores are really only useful when they give the
                 analyst “permission to ignore”.
               </p>
-              <div className="lg:col-span-5">
+              <div className="lg:col-span-5 col-start-10">
                 <p className="text-2xl font-semibold leading-8">
                   A more fundamental issue
                 </p>
@@ -817,24 +817,33 @@ export default function MaltedSRMV2() {
 
       <Container className="pb-40">
         <div className="grid grid-cols-12 gap-x-8">
-          <ScrollTimeline
-            steps={screenCopy}
-            heading={
-              <h2 className="text-3xl leading-[40px]">Key screens</h2>
-            }
-            media={[
-              `${IMG_V2}/Carousel 1.png`,
-              `${IMG_V2}/Carousel 2.png`,
-              `${IMG_V2}/Carousel 3.png`,
-            ].map((src) => (
-              <img
-                key={src}
-                src={src}
-                alt=""
-                className="w-full rounded-2xl object-cover"
-              />
-            ))}
-          />
+          <h2 className="col-span-12 text-3xl leading-[40px] lg:col-span-10 lg:col-start-2">
+            Key screens
+          </h2>
+
+          {screenCopy.map((screen, index) => {
+            const slug = ["extraction", "verification", "population"][index];
+            return (
+              <Fragment key={screen.title}>
+                <div className="col-span-12 mt-20 lg:col-span-5 lg:col-start-2">
+                  <h3 className="text-2xl font-semibold leading-8">
+                    {screen.title}
+                  </h3>
+                  <p className="mt-4 text-xl font-medium leading-7 text-black/60">
+                    {screen.body}
+                  </p>
+                </div>
+                <div className="col-span-12 mt-10 lg:col-span-10 lg:col-start-2">
+                  <img
+                    src={`${IMG_V2}/final-screens/${slug}.png`}
+                    alt={`${screen.title} screen`}
+                    className="w-full rounded-2xl"
+                  />
+                </div>
+              </Fragment>
+            );
+          })}
+
           <div className="col-span-12 mt-40 grid gap-x-8 gap-y-10 lg:col-span-6 lg:col-start-2 lg:grid-cols-2">
             {[
               { value: "£1.2 million", label: "projected annual value" },
