@@ -30,7 +30,7 @@ export default function BridgingDesignDev() {
 
       {/* ── Hero image ── */}
       <Container variant="full" className="mt-16">
-        <div className="relative overflow-hidden rounded-2xl h-[600px]">
+        <div className="relative overflow-hidden rounded-2xl aspect-[3/2]">
           <img
             src={`${IMG}/hero.png`}
             alt="National Grid balancing platform interface"

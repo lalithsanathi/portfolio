@@ -197,7 +197,7 @@ export default function NationalGridIntro() {
       {/* ── Hero image ── */}
       <Container variant="full" className="mt-0">
         <motion.div
-          className="h-[420px] overflow-hidden bg-[#d1d0d0] md:h-[600px] lg:h-[720px]"
+          className="aspect-[3/2] overflow-hidden bg-[#d1d0d0]"
           style={{ borderRadius: 16 }}
           initial={heroInitial}
           animate={heroAnimate}

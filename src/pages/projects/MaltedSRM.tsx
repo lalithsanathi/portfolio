@@ -85,7 +85,7 @@ export default function MaltedSRM() {
 
       {/* ── Hero image ── */}
       <Container variant="full" className="mt-0">
-        <div className="relative overflow-hidden rounded-2xl h-[640px]">
+        <div className="relative overflow-hidden rounded-2xl aspect-[3/2]">
           <img
             src="/images/projects/malted-srm/hero.png"
             alt=""

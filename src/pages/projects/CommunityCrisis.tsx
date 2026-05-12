@@ -80,7 +80,7 @@ export default function CommunityCrisis() {
       <section data-nav-theme="dark" aria-label="Project hero">
         <Container variant="full" className="mt-0">
           <motion.div
-            className="relative h-[600px] overflow-hidden"
+            className="relative aspect-[3/2] overflow-hidden"
             style={{ borderRadius: 16 }}
             initial={heroInitial}
             animate={heroAnimate}

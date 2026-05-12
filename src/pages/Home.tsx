@@ -37,10 +37,10 @@ interface HomeProject {
 
 /** Preload targets for the work grid so thumbnails start loading with the route, not after paint. */
 const HOME_PROJECT_IMAGE_URLS = [
-  '/images/projects/malted-srm/project-card-thumbnail.png',
+  '/images/projects/malted-srm-v2/hero.png',
   '/images/projects/malted-pulse/hero.png',
-  '/images/home-test/dashboard.png',
-  '/images/home-test/phone-mockup.png',
+  '/images/projects/national-grid/hero.png',
+  '/images/projects/community-crisis/hero2.png',
   '/images/home-test/type-space.png',
 ] as const;
 
@@ -53,7 +53,7 @@ const projects: HomeProject[] = [
     detail: 'Projected £1.2m annual value',
     href: '/projects/malted-srm-v2',
     className: 'bg-stone-200',
-    imageSrc: '/images/projects/malted-srm/project-card-thumbnail.png',
+    imageSrc: '/images/projects/malted-srm-v2/hero.png',
   },
   {
     id: 'malted-pulse',
@@ -73,7 +73,7 @@ const projects: HomeProject[] = [
     detail: 'Highest NPS across IBM UK&I',
     href: '/projects/national-grid-intro',
     className: 'bg-stone-200',
-    imageSrc: '/images/home-test/dashboard.png',
+    imageSrc: '/images/projects/national-grid/hero.png',
     navTheme: 'dark',
   },
   {
@@ -84,7 +84,7 @@ const projects: HomeProject[] = [
     detail: 'Crisis response concept',
     status: 'Coming soon',
     className: 'bg-stone-200',
-    imageSrc: '/images/home-test/phone-mockup.png',
+    imageSrc: '/images/projects/community-crisis/hero2.png',
   },
   {
     id: 'embedding-models',
