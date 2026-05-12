@@ -23,6 +23,7 @@ export function useExitFade(onProceed?: () => void): boolean {
     shouldBlockFn: () => !isExiting,
     withResolver: true,
     disabled: reduceMotion === true,
+    enableBeforeUnload: false,
   });
 
   useEffect(() => {
