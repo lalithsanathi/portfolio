@@ -464,7 +464,7 @@ export default function MaltedSRMV2() {
             global intelligence and cyber security consultancy, accelerating
             their background check process. Over a 4-month period, we
             went through the process from discovery to a system that analysts
-            genuinely trusted and wanted to use — demonstrating over £1M in
+            genuinely trusted and wanted to use — projecting over £1M in
             potential annual value. I collaborated closely with ML engineers on
             the data model and pipeline, building a tool that extracts and
             structures information from messy, multilingual documents into
