@@ -838,7 +838,7 @@ export default function MaltedSRMV2() {
           <div className="col-span-12 mt-40 grid gap-x-8 gap-y-10 lg:col-span-6 lg:col-start-2 lg:grid-cols-2">
             {[
               { value: "£1.2 million", label: "projected annual value" },
-              { value: "20% → 90%", label: "analyst trust in AI system" },
+              { value: "20% → 90%", label: "user trust in AI system" },
               { value: "10-15%", label: "time savings per case" },
               { value: "3 → 1 tools", label: "tools consolidated" },
             ].map((stat) => (
