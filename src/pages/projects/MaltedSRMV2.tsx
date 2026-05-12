@@ -580,7 +580,7 @@ export default function MaltedSRMV2() {
         <p>
           Every case involves 2-3 hours of manual data entry. That’s skilled
           analysts copying and pasting between documents, re-entering data
-          across templates, formatting reports, repeated thousands of times a
+          across files, formatting reports, repeated thousands of times a
           year.
         </p>
       </BlackBand>
