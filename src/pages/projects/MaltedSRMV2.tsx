@@ -17,7 +17,7 @@ const IMG_V2 = "/images/projects/malted-srm-v2";
 
 const stats = [
   { value: "£1.2 million", label: "projected annual value" },
-  { value: "20% → 90%", label: "analyst trust in AI system" },
+  { value: "20% → 90%", label: "user trust in AI system" },
   { value: "10-15%", label: "time savings per case" },
 ];
 
