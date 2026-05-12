@@ -432,7 +432,7 @@ export default function MaltedSRMV2() {
             animate={heroAnimate}
             transition={{ ...spring, delay: 0.2 }}
           >
-            Building an AI-powered background check tool for S-RM
+            Building an AI-powered background check tool
           </motion.h1>
 
           <motion.div
