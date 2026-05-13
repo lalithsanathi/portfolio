@@ -37,7 +37,7 @@ interface HomeProject {
 
 /** Preload targets for the work grid so thumbnails start loading with the route, not after paint. */
 const HOME_PROJECT_IMAGE_URLS = [
-  '/images/projects/malted-srm-v2/hero.png',
+  '/images/projects/malted-srm/hero.png',
   '/images/projects/malted-pulse/hero.png',
   '/images/projects/national-grid/hero.png',
   '/images/projects/community-crisis/hero2.png',
@@ -51,9 +51,9 @@ const projects: HomeProject[] = [
     eyebrow: 'AI product design',
     summary: 'Turning messy source documents into analyst-ready evidence, with trust cues built into the workflow.',
     detail: 'Projected £1.2m annual value',
-    href: '/projects/malted-srm-v2',
+    href: '/projects/malted-srm',
     className: 'bg-stone-200',
-    imageSrc: '/images/projects/malted-srm-v2/hero.png',
+    imageSrc: '/images/projects/malted-srm/hero.png',
   },
   {
     id: 'malted-pulse',

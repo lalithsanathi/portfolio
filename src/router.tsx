@@ -53,9 +53,6 @@ const MaltedPulse = lazyRouteComponent(
   () => import('./pages/projects/MaltedPulse'),
 );
 const MaltedSRM = lazyRouteComponent(() => import('./pages/projects/MaltedSRM'));
-const MaltedSRMV2 = lazyRouteComponent(
-  () => import('./pages/projects/MaltedSRMV2'),
-);
 const BridgingDesignDev = lazyRouteComponent(
   () => import('./pages/projects/BridgingDesignDev'),
 );
@@ -106,12 +103,6 @@ const maltedSRMRoute = createRoute({
   component: MaltedSRM,
 });
 
-const maltedSRMV2Route = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/projects/malted-srm-v2',
-  component: MaltedSRMV2,
-});
-
 const bridgingDesignDevRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/projects/bridging-design-and-dev',
@@ -148,7 +139,6 @@ const routeTree = rootRoute.addChildren([
   designSystemRoute,
   maltedPulseRoute,
   maltedSRMRoute,
-  maltedSRMV2Route,
   bridgingDesignDevRoute,
   bridgingDesignDevV2Route,
   nationalGridIntroRoute,
