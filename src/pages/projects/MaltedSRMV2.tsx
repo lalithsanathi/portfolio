@@ -131,6 +131,25 @@ const screenCopy = [
   },
 ];
 
+const finalResults = [
+  {
+    value: "£1.2 million",
+    label: "projected annual value",
+  },
+  {
+    value: "20% → 90%",
+    label: "user trust in AI system",
+  },
+  {
+    value: "10-15%",
+    label: "time savings per case",
+  },
+  {
+    value: "3 → 1 tools",
+    label: "tools consolidated",
+  },
+];
+
 function TextBlock({
   title,
   children,
@@ -798,19 +817,25 @@ export default function MaltedSRMV2() {
 
           <div className="col-span-12 mt-28 lg:col-span-10 lg:col-start-2">
             <h3 className="text-2xl font-semibold leading-8">
-              Finding the right feel
+              Rapid prototyping with code
             </h3>
             <p className="mt-4 max-w-[536px] text-xl font-medium leading-7 text-black/60">
-              The interaction design still had open questions — how should pins
-              behave when they’re close together, how does the user target a
-              specific one, and how does the system handle overlapping sources
-              on dense documents?
+              I built a coded prototype to make the interaction tangible,
+              then used it with team members and users to refine the pin
+              behaviour, stress-test dense documents, and move quickly through
+              iteration cycles.
             </p>
-            <img
-              src={`${IMG_V2}/feel.png`}
-              alt="Interaction explorations for dense source pins"
-              className="mt-10 w-full rounded-2xl"
-            />
+            <div className="mt-10 overflow-hidden rounded-2xl">
+              <video
+                src={`${IMG_V2}/tooltips.mp4`}
+                aria-label="Coded prototype showing source pin tooltip interactions"
+                className="m-[-16px] w-[calc(100%+32px)] max-w-none"
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            </div>
           </div>
         </div>
       </Container>
@@ -818,7 +843,7 @@ export default function MaltedSRMV2() {
       <Container className="pb-40">
         <div className="grid grid-cols-12 gap-x-8">
           <h2 className="col-span-12 text-3xl leading-[40px] lg:col-span-10 lg:col-start-2">
-            Key screens
+            Main flow
           </h2>
 
           {screenCopy.map((screen, index) => {
@@ -844,94 +869,110 @@ export default function MaltedSRMV2() {
             );
           })}
 
-          <div className="col-span-12 mt-40 grid gap-x-8 gap-y-10 lg:col-span-6 lg:col-start-2 lg:grid-cols-2">
-            {[
-              { value: "£1.2 million", label: "projected annual value" },
-              { value: "20% → 90%", label: "user trust in AI system" },
-              { value: "10-15%", label: "time savings per case" },
-              { value: "3 → 1 tools", label: "tools consolidated" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <p className="text-3xl font-medium leading-[40px] text-black/80">
-                  {stat.value}
+          <div className="col-span-12 mt-40 lg:col-span-10 lg:col-start-2">
+            <div className="grid gap-x-8 gap-y-8 lg:grid-cols-12">
+              <div className="lg:col-span-5">
+                <h2 className="text-3xl leading-[40px]">Results</h2>
+                <p className="mt-4 text-xl font-medium leading-7 text-black/60">
+                  The pilot proved the tool could make AI useful inside a
+                  high-stakes analyst workflow: faster case preparation,
+                  higher confidence in the output, and a clearer path to an
+                  MVP the team could build.
                 </p>
-                <p className="mt-1 text-xl leading-8">{stat.label}</p>
               </div>
-            ))}
+            </div>
+
+            <div className="mt-16 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+              {finalResults.map((stat) => (
+                <div key={stat.label} className="border-t border-black/10 pt-6">
+                  <p className="text-3xl font-medium leading-[40px] text-black/80">
+                    {stat.value}
+                  </p>
+                  <p className="mt-1 text-xl leading-8">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-16 max-w-[760px] text-3xl font-light italic leading-[40px] text-black/80">
+              The biggest shift was trust. Analysts did not need the AI to be
+              perfect, they needed a fast way to check it.
+            </p>
           </div>
         </div>
       </Container>
 
-      <Container className="pb-40">
+      <Container>
         <div className="grid grid-cols-12 gap-x-8">
-          <div className="col-span-12 lg:col-span-10 lg:col-start-2">
-            <h2 className="text-3xl leading-[40px]">More projects</h2>
-            <div className="mt-10 grid gap-5 md:grid-cols-2">
-              {[
-                {
-                  title: "Malted Pulse",
-                  eyebrow: "Product systems",
-                  summary:
-                    "A calmer operating layer for reviewing risk, surfacing context, and moving investigations forward.",
-                  detail: "Built for complex review flows",
-                  href: "/projects/malted-pulse",
-                  imageSrc: "/images/projects/malted-pulse/hero.png",
-                },
-                {
-                  title: "Bringing balance at National Grid",
-                  eyebrow: "Design systems",
-                  summary:
-                    "Helping balancing engineers work faster inside high-stakes electricity grid software.",
-                  detail: "Highest NPS across IBM UK&I",
-                  href: "/projects/national-grid-intro",
-                  imageSrc: "/images/home-test/dashboard.png",
-                },
-              ].map((project) => (
-                <div
-                  key={project.href}
-                  className="group relative aspect-7/6 overflow-hidden rounded-2xl bg-stone-200 shadow-[0_1px_0_rgba(255,255,255,0.35)_inset] transition-shadow duration-500 ease-[cubic-bezier(0.2,0,0,1)] hover:shadow-[0_22px_70px_rgba(29,28,26,0.12)] focus-within:shadow-[0_22px_70px_rgba(29,28,26,0.12)]"
-                >
-                  <img
-                    src={project.imageSrc}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)] will-change-transform group-hover:scale-[1.035] group-focus-within:scale-[1.035]"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(250,250,248,0)_28%,rgba(250,250,248,0.38)_68%,rgba(250,250,248,0.82)_100%)] opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.2,0,0,1)] group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
-                  />
-                  <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 rounded-xl border border-white/70 bg-gray-warm-50/76 p-4 text-gray-warm-900 opacity-0 shadow-[0_16px_42px_rgba(29,28,26,0.13),inset_0_1px_0_rgba(255,255,255,0.78)] backdrop-blur-xl transition-opacity duration-500 ease-[cubic-bezier(0.2,0,0,1)] group-hover:opacity-100 group-focus-within:opacity-100 sm:inset-x-4 sm:bottom-4 sm:p-5 [@media(hover:none)]:opacity-100">
-                    <div className="flex items-start justify-between gap-4">
-                      <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-gray-warm-600">
-                        {project.eyebrow}
-                      </p>
-                      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-warm-900/8 text-lg leading-none text-gray-warm-800 transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-within:-translate-y-0.5 group-focus-within:translate-x-0.5">
-                        ↗
-                      </span>
-                    </div>
-                    <h3 className="mt-2 max-w-[calc(100%-4.5rem)] text-pretty font-display text-2xl leading-8 text-gray-warm-950 sm:text-[28px] sm:leading-9">
-                      {project.title}
-                    </h3>
-                    <p className="mt-3 max-w-[min(64rem,calc(100%-4.5rem))] text-pretty text-[15px] leading-6 text-gray-warm-700 sm:text-base sm:leading-7">
-                      {project.summary}
-                    </p>
-                    <p className="mt-4 inline-flex rounded-full border border-gray-warm-900/8 bg-white/60 px-3 py-1 text-[13px] font-medium leading-5 text-gray-warm-700">
-                      {project.detail}
-                    </p>
-                  </div>
-                  <Link
-                    to={project.href}
-                    preload="viewport"
-                    className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
-                    aria-label={`${project.title}. ${project.summary}`}
-                  />
-                  <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/5 ring-inset" />
+          <h2 className="col-span-12 text-3xl leading-[40px] lg:col-span-10 lg:col-start-2">
+            More projects
+          </h2>
+        </div>
+      </Container>
+      <Container variant="full" className="pb-40">
+        <div className="mt-10 grid gap-5 md:grid-cols-2">
+          {[
+            {
+              title: "Malted Pulse",
+              eyebrow: "Product systems",
+              summary:
+                "A calmer operating layer for reviewing risk, surfacing context, and moving investigations forward.",
+              detail: "Built for complex review flows",
+              href: "/projects/malted-pulse",
+              imageSrc: "/images/projects/malted-pulse/hero.png",
+            },
+            {
+              title: "Bringing balance at National Grid",
+              eyebrow: "Design systems",
+              summary:
+                "Helping balancing engineers work faster inside high-stakes electricity grid software.",
+              detail: "Highest NPS across IBM UK&I",
+              href: "/projects/national-grid-intro",
+              imageSrc: "/images/projects/national-grid/hero.png",
+            },
+          ].map((project) => (
+            <div
+              key={project.href}
+              className="group relative aspect-7/6 overflow-hidden rounded-2xl bg-stone-200 shadow-[0_1px_0_rgba(255,255,255,0.35)_inset] transition-shadow duration-500 ease-[cubic-bezier(0.2,0,0,1)] hover:shadow-[0_22px_70px_rgba(29,28,26,0.12)] focus-within:shadow-[0_22px_70px_rgba(29,28,26,0.12)]"
+            >
+              <img
+                src={project.imageSrc}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)] will-change-transform group-hover:scale-[1.035] group-focus-within:scale-[1.035]"
+                loading="lazy"
+                decoding="async"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(250,250,248,0)_28%,rgba(250,250,248,0.38)_68%,rgba(250,250,248,0.82)_100%)] opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.2,0,0,1)] group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+              />
+              <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 rounded-xl border border-white/70 bg-gray-warm-50/76 p-4 text-gray-warm-900 opacity-0 shadow-[0_16px_42px_rgba(29,28,26,0.13),inset_0_1px_0_rgba(255,255,255,0.78)] backdrop-blur-xl transition-opacity duration-500 ease-[cubic-bezier(0.2,0,0,1)] group-hover:opacity-100 group-focus-within:opacity-100 sm:inset-x-4 sm:bottom-4 sm:p-5 [@media(hover:none)]:opacity-100">
+                <div className="flex items-start justify-between gap-4">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-gray-warm-600">
+                    {project.eyebrow}
+                  </p>
+                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-warm-900/8 text-lg leading-none text-gray-warm-800 transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-within:-translate-y-0.5 group-focus-within:translate-x-0.5">
+                    ↗
+                  </span>
                 </div>
-              ))}
+                <h3 className="mt-2 max-w-[calc(100%-4.5rem)] text-pretty font-display text-2xl leading-8 text-gray-warm-950 sm:text-[28px] sm:leading-9">
+                  {project.title}
+                </h3>
+                <p className="mt-3 max-w-[min(64rem,calc(100%-4.5rem))] text-pretty text-[15px] leading-6 text-gray-warm-700 sm:text-base sm:leading-7">
+                  {project.summary}
+                </p>
+                <p className="mt-4 inline-flex rounded-full border border-gray-warm-900/8 bg-white/60 px-3 py-1 text-[13px] font-medium leading-5 text-gray-warm-700">
+                  {project.detail}
+                </p>
+              </div>
+              <Link
+                to={project.href}
+                preload="viewport"
+                className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700"
+                aria-label={`${project.title}. ${project.summary}`}
+              />
+              <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/5 ring-inset" />
             </div>
-          </div>
+          ))}
         </div>
       </Container>
     </motion.main>
