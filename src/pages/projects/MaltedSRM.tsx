@@ -1,10 +1,4 @@
-import {
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { Fragment, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import Container from "../../components/Container";
